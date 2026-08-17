@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"lms-backend/config"
 	"lms-backend/models"
@@ -12,10 +14,23 @@ import (
 type CreateCourseInput struct {
 	Title       string  `json:"title" binding:"required"`
 	Description string  `json:"description"`
-	Price       float64 `json:"price" binding:"required"`
+	Price       float64 `json:"price"`
 }
 
-// CreateCourse — Instructor හෝ Admin විසින් නව Course එකක් සෑදීම
+type UpdateCourseInput struct {
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Price       float64 `json:"price"`
+	Status      string  `json:"status"`
+}
+
+// Simple helper function to generate slug without external packages
+func generateSlug(title string) string {
+	slug := strings.ToLower(title)
+	slug = strings.ReplaceAll(slug, " ", "-")
+	return slug
+}
+
 func CreateCourse(c *gin.Context) {
 	var input CreateCourseInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -24,15 +39,18 @@ func CreateCourse(c *gin.Context) {
 	}
 
 	userID, _ := c.Get("user_id")
-
-	// float64 මගින් එන user_id එක uint බවට පත් කිරීම
 	instructorID := uint(userID.(float64))
+
+	baseSlug := generateSlug(input.Title)
+	slugName := fmt.Sprintf("%s-%d", baseSlug, strings.Count(baseSlug, "")+int(instructorID))
 
 	course := models.Course{
 		Title:        input.Title,
+		Slug:         slugName,
 		Description:  input.Description,
 		Price:        input.Price,
 		InstructorID: instructorID,
+		Status:       "DRAFT",
 	}
 
 	if err := config.DB.Create(&course).Error; err != nil {
@@ -40,45 +58,28 @@ func CreateCourse(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": "Course created successfully",
-		"course":  course,
-	})
+	c.JSON(http.StatusCreated, gin.H{"message": "Course created successfully", "course": course})
 }
 
-// GetCourses — පද්ධතියේ ඇති සියලුම Courses ලබාගැනීම (Public)
 func GetCourses(c *gin.Context) {
 	var courses []models.Course
-
-	// Instructor ගේ විස්තර සහ Sections/Lessons එක්ක Load කිරීම
 	if err := config.DB.Preload("Instructor").Preload("Sections.Lessons").Find(&courses).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch courses"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"courses": courses})
 }
 
-// GetCourseByID — ID එක මගින් නිශ්චිත Course එකක විස්තර ලබාගැනීම
 func GetCourseByID(c *gin.Context) {
 	id := c.Param("id")
 	var course models.Course
-
 	if err := config.DB.Preload("Instructor").Preload("Sections.Lessons").First(&course, id).Error; err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
 		return
 	}
-
 	c.JSON(http.StatusOK, gin.H{"course": course})
 }
 
-type UpdateCourseInput struct {
-	Title       string  `json:"title"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
-}
-
-// UpdateCourse — Course එකක් Update කිරීම (Instructor/Admin)
 func UpdateCourse(c *gin.Context) {
 	id := c.Param("id")
 	var course models.Course
@@ -92,7 +93,6 @@ func UpdateCourse(c *gin.Context) {
 	userRole, _ := c.Get("role")
 	currentUserID := uint(userID.(float64))
 
-	// Admin ට ඕනෑම course එකක් edit කල හැක, Instructor ට තමන්ගේම course පමණි
 	if userRole != string(models.RoleAdmin) && course.InstructorID != currentUserID {
 		c.JSON(http.StatusForbidden, gin.H{"error": "You can only update your own courses"})
 		return
@@ -104,19 +104,20 @@ func UpdateCourse(c *gin.Context) {
 		return
 	}
 
-	config.DB.Model(&course).Updates(models.Course{
-		Title:       input.Title,
-		Description: input.Description,
-		Price:       input.Price,
-	})
+	course.Title = input.Title
+	course.Description = input.Description
+	course.Price = input.Price
+	if input.Status != "" {
+		course.Status = input.Status
+	}
+	if input.Title != "" {
+		course.Slug = generateSlug(input.Title)
+	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Course updated successfully",
-		"course":  course,
-	})
+	config.DB.Save(&course)
+	c.JSON(http.StatusOK, gin.H{"message": "Course updated successfully", "course": course})
 }
 
-// DeleteCourse — Course එකක් Delete කිරීම (Instructor/Admin)
 func DeleteCourse(c *gin.Context) {
 	id := c.Param("id")
 	var course models.Course

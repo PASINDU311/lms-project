@@ -31,7 +31,7 @@ func SetupRouter() *gin.Engine {
 		authGroup.POST("/login", controllers.Login)
 	}
 
-	// Public Course Routes (ඕනෑම අයෙකුට පාඨමාලා බලාගත හැක)
+	// Public Course Routes
 	r.GET("/api/courses", controllers.GetCourses)
 	r.GET("/api/courses/:id", controllers.GetCourseByID)
 
@@ -41,13 +41,18 @@ func SetupRouter() *gin.Engine {
 	{
 		protected.GET("/profile", controllers.GetProfile)
 
-		// Instructor සහ Admin හට පමණක් Course Create/Update/Delete කල හැක
-		courseAdmin := protected.Group("/courses")
-		courseAdmin.Use(middlewares.RoleMiddleware("INSTRUCTOR", "ADMIN"))
+		// Instructor / Admin Only Routes
+		instructorAdmin := protected.Group("")
+		instructorAdmin.Use(middlewares.RoleMiddleware("INSTRUCTOR", "ADMIN"))
 		{
-			courseAdmin.POST("", controllers.CreateCourse)
-			courseAdmin.PUT("/:id", controllers.UpdateCourse)
-			courseAdmin.DELETE("/:id", controllers.DeleteCourse)
+			// Course Management
+			instructorAdmin.POST("/courses", controllers.CreateCourse)
+			instructorAdmin.PUT("/courses/:id", controllers.UpdateCourse)
+			instructorAdmin.DELETE("/courses/:id", controllers.DeleteCourse)
+
+			// Section & Lesson Management
+			instructorAdmin.POST("/sections", controllers.CreateSection)
+			instructorAdmin.POST("/lessons", controllers.CreateLesson)
 		}
 	}
 
