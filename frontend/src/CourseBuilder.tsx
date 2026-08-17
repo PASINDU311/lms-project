@@ -39,6 +39,16 @@ const CourseBuilder: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const [content, setContent] = useState('');
 
+  // Edit Section State
+  const [editingSectionId, setEditingSectionId] = useState<number | null>(null);
+  const [editSectionTitle, setEditSectionTitle] = useState('');
+
+  // Edit Lesson State
+  const [editingLessonId, setEditingLessonId] = useState<number | null>(null);
+  const [editLessonTitle, setEditLessonTitle] = useState('');
+  const [editLessonVideoUrl, setEditLessonVideoUrl] = useState('');
+  const [editLessonContent, setEditLessonContent] = useState('');
+
   const fetchCourseDetails = () => {
     API.get(`/courses/${id}`)
       .then((res) => {
@@ -55,11 +65,10 @@ const CourseBuilder: React.FC = () => {
     fetchCourseDetails();
   }, [id]);
 
-  // Handle Add Section
+  // Section Actions
   const handleAddSection = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sectionTitle) return;
-
     try {
       await API.post('/sections', {
         course_id: Number(id),
@@ -67,17 +76,36 @@ const CourseBuilder: React.FC = () => {
         order: (course?.sections?.length || 0) + 1,
       });
       setSectionTitle('');
-      fetchCourseDetails(); // Refresh list
+      fetchCourseDetails();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to add section');
     }
   };
 
-  // Handle Add Lesson
+  const handleUpdateSection = async (sectionId: number) => {
+    try {
+      await API.put(`/sections/${sectionId}`, { title: editSectionTitle });
+      setEditingSectionId(null);
+      fetchCourseDetails();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to update section');
+    }
+  };
+
+  const handleDeleteSection = async (sectionId: number) => {
+    if (!window.confirm('Are you sure you want to delete this section and all its lessons?')) return;
+    try {
+      await API.delete(`/sections/${sectionId}`);
+      fetchCourseDetails();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete section');
+    }
+  };
+
+  // Lesson Actions
   const handleAddLesson = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedSectionId || !lessonTitle) return;
-
     try {
       await API.post('/lessons', {
         section_id: selectedSectionId,
@@ -92,9 +120,33 @@ const CourseBuilder: React.FC = () => {
       setVideoUrl('');
       setContent('');
       setSelectedSectionId(null);
-      fetchCourseDetails(); // Refresh list
+      fetchCourseDetails();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to add lesson');
+    }
+  };
+
+  const handleUpdateLesson = async (lessonId: number) => {
+    try {
+      await API.put(`/lessons/${lessonId}`, {
+        title: editLessonTitle,
+        video_url: editLessonVideoUrl,
+        content: editLessonContent,
+      });
+      setEditingLessonId(null);
+      fetchCourseDetails();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to update lesson');
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId: number) => {
+    if (!window.confirm('Are you sure you want to delete this lesson?')) return;
+    try {
+      await API.delete(`/lessons/${lessonId}`);
+      fetchCourseDetails();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete lesson');
     }
   };
 
@@ -135,16 +187,53 @@ const CourseBuilder: React.FC = () => {
         course.sections.map((section) => (
           <div key={section.id} style={{ border: '1px solid #cbd5e1', borderRadius: '5px', padding: '15px', marginBottom: '15px', backgroundColor: '#fff' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h4 style={{ margin: 0, color: '#1e293b' }}>📂 {section.title}</h4>
-              <button
-                onClick={() => setSelectedSectionId(selectedSectionId === section.id ? null : section.id)}
-                style={{ padding: '5px 10px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
-              >
-                {selectedSectionId === section.id ? 'Cancel' : '+ Add Lesson'}
-              </button>
+              {editingSectionId === section.id ? (
+                <div style={{ display: 'flex', gap: '10px', flex: 1, marginRight: '10px' }}>
+                  <input
+                    type="text"
+                    value={editSectionTitle}
+                    onChange={(e) => setEditSectionTitle(e.target.value)}
+                    style={{ flex: 1, padding: '5px' }}
+                  />
+                  <button onClick={() => handleUpdateSection(section.id)} style={{ padding: '5px 10px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
+                    Save
+                  </button>
+                  <button onClick={() => setEditingSectionId(null)} style={{ padding: '5px 10px', background: '#7f8c8d', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <h4 style={{ margin: 0, color: '#1e293b' }}>📂 {section.title}</h4>
+              )}
+
+              {editingSectionId !== section.id && (
+                <div>
+                  <button
+                    onClick={() => {
+                      setEditingSectionId(section.id);
+                      setEditSectionTitle(section.title);
+                    }}
+                    style={{ padding: '5px 10px', background: '#f39c12', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px', marginRight: '5px' }}
+                  >
+                    Edit Title
+                  </button>
+                  <button
+                    onClick={() => setSelectedSectionId(selectedSectionId === section.id ? null : section.id)}
+                    style={{ padding: '5px 10px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px', marginRight: '5px' }}
+                  >
+                    {selectedSectionId === section.id ? 'Cancel' : '+ Add Lesson'}
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSection(section.id)}
+                    style={{ padding: '5px 10px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
+                  >
+                    Delete Section
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Add Lesson Form for selected section */}
+            {/* Add Lesson Form */}
             {selectedSectionId === section.id && (
               <form onSubmit={handleAddLesson} style={{ marginTop: '15px', padding: '10px', background: '#f1f5f9', borderRadius: '4px' }}>
                 <h5>New Lesson for: {section.title}</h5>
@@ -158,7 +247,7 @@ const CourseBuilder: React.FC = () => {
                 />
                 <input
                   type="text"
-                  placeholder="YouTube Video URL (e.g. https://www.youtube.com/watch?v=...)"
+                  placeholder="YouTube Video URL"
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
                   style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
@@ -176,12 +265,67 @@ const CourseBuilder: React.FC = () => {
               </form>
             )}
 
-            {/* Lessons List under Section */}
+            {/* Lessons List */}
             <ul style={{ listStyle: 'none', paddingLeft: '15px', marginTop: '10px' }}>
               {section.lessons && section.lessons.length > 0 ? (
                 section.lessons.map((lesson) => (
-                  <li key={lesson.id} style={{ padding: '6px 0', borderBottom: '1px dashed #e2e8f0', fontSize: '14px', color: '#334155' }}>
-                    ▶ <strong>{lesson.title}</strong> {lesson.video_url && <small style={{ color: '#0066cc' }}>(Video Attached)</small>}
+                  <li key={lesson.id} style={{ padding: '8px 0', borderBottom: '1px dashed #e2e8f0', fontSize: '14px' }}>
+                    {editingLessonId === lesson.id ? (
+                      <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+                        <input
+                          type="text"
+                          value={editLessonTitle}
+                          onChange={(e) => setEditLessonTitle(e.target.value)}
+                          placeholder="Lesson Title"
+                          style={{ width: '100%', padding: '6px', marginBottom: '6px', boxSizing: 'border-box' }}
+                        />
+                        <input
+                          type="text"
+                          value={editLessonVideoUrl}
+                          onChange={(e) => setEditLessonVideoUrl(e.target.value)}
+                          placeholder="Video URL"
+                          style={{ width: '100%', padding: '6px', marginBottom: '6px', boxSizing: 'border-box' }}
+                        />
+                        <textarea
+                          value={editLessonContent}
+                          onChange={(e) => setEditLessonContent(e.target.value)}
+                          placeholder="Lesson Notes"
+                          rows={2}
+                          style={{ width: '100%', padding: '6px', marginBottom: '6px', boxSizing: 'border-box' }}
+                        />
+                        <button onClick={() => handleUpdateLesson(lesson.id)} style={{ padding: '4px 10px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', marginRight: '5px' }}>
+                          Update Lesson
+                        </button>
+                        <button onClick={() => setEditingLessonId(null)} style={{ padding: '4px 10px', background: '#7f8c8d', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: '#334155' }}>
+                          ▶ <strong>{lesson.title}</strong> {lesson.video_url && <small style={{ color: '#0066cc' }}>(Video Attached)</small>}
+                        </span>
+                        <div>
+                          <button
+                            onClick={() => {
+                              setEditingLessonId(lesson.id);
+                              setEditLessonTitle(lesson.title);
+                              setEditLessonVideoUrl(lesson.video_url);
+                              setEditLessonContent(lesson.content);
+                            }}
+                            style={{ padding: '2px 8px', background: '#f39c12', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '11px', marginRight: '5px' }}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteLesson(lesson.id)}
+                            style={{ padding: '2px 8px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </li>
                 ))
               ) : (

@@ -52,6 +52,47 @@ func CreateSection(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Section created successfully", "section": section})
 }
 
+// UpdateSection — Section Title එක Update කිරීම
+func UpdateSection(c *gin.Context) {
+	id := c.Param("id")
+	var section models.Section
+
+	if err := config.DB.First(&section, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Section not found"})
+		return
+	}
+
+	var input struct {
+		Title string `json:"title" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	config.DB.Model(&section).Update("title", input.Title)
+	c.JSON(http.StatusOK, gin.H{"message": "Section updated successfully", "section": section})
+}
+
+// DeleteSection — Section එකක් Delete කිරීම
+func DeleteSection(c *gin.Context) {
+	id := c.Param("id")
+	var section models.Section
+
+	if err := config.DB.First(&section, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Section not found"})
+		return
+	}
+
+	if err := config.DB.Delete(&section).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete section"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Section deleted successfully"})
+}
+
 func CreateLesson(c *gin.Context) {
 	var input CreateLessonInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -81,4 +122,52 @@ func CreateLesson(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"message": "Lesson created successfully", "lesson": lesson})
+}
+
+// UpdateLesson — Lesson එකක විස්තර Update කිරීම
+func UpdateLesson(c *gin.Context) {
+	id := c.Param("id")
+	var lesson models.Lesson
+
+	if err := config.DB.First(&lesson, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Lesson not found"})
+		return
+	}
+
+	var input struct {
+		Title    string `json:"title"`
+		VideoURL string `json:"video_url"`
+		Content  string `json:"content"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	config.DB.Model(&lesson).Updates(models.Lesson{
+		Title:    input.Title,
+		VideoURL: input.VideoURL,
+		Content:  input.Content,
+	})
+
+	c.JSON(http.StatusOK, gin.H{"message": "Lesson updated successfully", "lesson": lesson})
+}
+
+// DeleteLesson — Lesson එකක් Delete කිරීම
+func DeleteLesson(c *gin.Context) {
+	id := c.Param("id")
+	var lesson models.Lesson
+
+	if err := config.DB.First(&lesson, id).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Lesson not found"})
+		return
+	}
+
+	if err := config.DB.Delete(&lesson).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete lesson"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Lesson deleted successfully"})
 }

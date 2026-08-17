@@ -54,9 +54,15 @@ func SetupRouter() *gin.Engine {
 			instructorAdmin.PUT("/courses/:id", controllers.UpdateCourse)
 			instructorAdmin.DELETE("/courses/:id", controllers.DeleteCourse)
 
-			// Section & Lesson Management
+			// Section Management
 			instructorAdmin.POST("/sections", controllers.CreateSection)
+			instructorAdmin.PUT("/sections/:id", controllers.UpdateSection)
+			instructorAdmin.DELETE("/sections/:id", controllers.DeleteSection)
+
+			// Lesson Management
 			instructorAdmin.POST("/lessons", controllers.CreateLesson)
+			instructorAdmin.PUT("/lessons/:id", controllers.UpdateLesson)
+			instructorAdmin.DELETE("/lessons/:id", controllers.DeleteLesson)
 		}
 	}
 
