@@ -1,27 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './Login';
+import Register from './Register';
+import Dashboard from './Dashboard';
+import CourseDetail from './CourseDetail';
+import CreateCourse from './CreateCourse';
+import MyCourses from './MyCourses';
+import CoursePlayer from './CoursePlayer';
+import CourseBuilder from './CourseBuilder';
 
-function App() {
-  const [message, setMessage] = useState<string>('Loading...');
-
-  useEffect(() => {
-    // Backend API endpoint එකට request එකක් යැවීම
-    axios.get('http://localhost:8080/api/test')
-      .then((response) => {
-        setMessage(response.data);
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
-        setMessage('Backend Connection Failed!');
-      });
-  }, []);
+const App: React.FC = () => {
+  const token = sessionStorage.getItem('token');
 
   return (
-    <div style={{ textAlign: 'center', marginTop: '50px', fontFamily: 'sans-serif' }}>
-      <h1>LMS Project - Phase 01 Test</h1>
-      <p>Backend Response: <strong>{message}</strong></p>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={!token ? <Login /> : <Navigate to="/dashboard" />} />
+        <Route path="/register" element={!token ? <Register /> : <Navigate to="/dashboard" />} />
+        <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/courses/:id" element={token ? <CourseDetail /> : <Navigate to="/" />} />
+        <Route path="/create-course" element={token ? <CreateCourse /> : <Navigate to="/" />} />
+        <Route path="/my-courses" element={token ? <MyCourses /> : <Navigate to="/" />} />
+        <Route path="/learn/:id" element={token ? <CoursePlayer /> : <Navigate to="/" />} />
+        <Route path="/builder/:id" element={token ? <CourseBuilder /> : <Navigate to="/" />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
