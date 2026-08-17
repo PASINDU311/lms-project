@@ -1,0 +1,19 @@
+# Go binaries & temp files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# Node / React (ඉදිරියට ඕන වෙනවා)
+node_modules/
+build/
+dist/
+
+# Environment Variables & IDE
+.env
+.vscode/
+.idea/
