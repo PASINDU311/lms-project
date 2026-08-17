@@ -41,6 +41,10 @@ func SetupRouter() *gin.Engine {
 	{
 		protected.GET("/profile", controllers.GetProfile)
 
+		// Student Progress Routes
+		protected.POST("/progress/complete", controllers.CompleteLesson)
+		protected.GET("/progress/:course_id", controllers.GetCourseProgress)
+
 		// Student / User Enrollment Routes
 		protected.POST("/enrollments", controllers.EnrollCourse)
 		protected.GET("/my-courses", controllers.GetMyEnrollments)

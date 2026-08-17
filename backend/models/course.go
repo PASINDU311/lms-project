@@ -7,18 +7,18 @@ import (
 )
 
 type Course struct {
-	ID          uint           `gorm:"primaryKey" json:"id"`
-	Title       string         `gorm:"size:255;not null" json:"title"`
-	Slug        string         `gorm:"size:255;uniqueIndex;not null" json:"slug"`
-	Description string         `gorm:"type:text" json:"description"`
-	Price       float64        `gorm:"type:decimal(10,2);default:0.00" json:"price"`
-	InstructorID uint          `gorm:"not null" json:"instructor_id"`
-	Instructor  User           `gorm:"foreignKey:InstructorID" json:"instructor,omitempty"`
-	Status      string         `gorm:"size:50;default:'DRAFT'" json:"status"` // DRAFT, PUBLISHED, ARCHIVED
-	Sections    []Section      `gorm:"foreignKey:CourseID;constraint:OnDelete:CASCADE" json:"sections,omitempty"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+	ID           uint           `gorm:"primaryKey" json:"id"`
+	Title        string         `gorm:"size:255;not null" json:"title"`
+	Slug         string         `gorm:"size:255;uniqueIndex;not null" json:"slug"`
+	Description  string         `gorm:"type:text" json:"description"`
+	Price        float64        `gorm:"type:decimal(10,2);default:0.00" json:"price"`
+	InstructorID uint           `gorm:"not null" json:"instructor_id"`
+	Instructor   User           `gorm:"foreignKey:InstructorID" json:"instructor,omitempty"`
+	Status       string         `gorm:"size:50;default:'DRAFT'" json:"status"` // DRAFT, PUBLISHED, ARCHIVED
+	Sections     []Section      `gorm:"foreignKey:CourseID;constraint:OnDelete:CASCADE" json:"sections,omitempty"`
+	CreatedAt    time.Time      `json:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at"`
+	DeletedAt    gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 type Section struct {
@@ -44,4 +44,14 @@ type Lesson struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+}
+
+// Course Progress tracking structure
+type LessonProgress struct {
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	UserID    uint      `gorm:"not null;uniqueIndex:idx_user_lesson" json:"user_id"`
+	LessonID  uint      `gorm:"not null;uniqueIndex:idx_user_lesson" json:"lesson_id"`
+	CourseID  uint      `gorm:"not null" json:"course_id"`
+	IsDone    bool      `gorm:"default:true" json:"is_done"`
+	CreatedAt time.Time `json:"created_at"`
 }

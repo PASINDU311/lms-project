@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"lms-backend/models"
+
 	"github.com/joho/godotenv"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -34,6 +36,20 @@ func ConnectDatabase() {
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database: ", err)
+	}
+
+	// Database Tables Auto Migration
+	err = database.AutoMigrate(
+		&models.User{},
+		&models.Course{},
+		&models.Section{},
+		&models.Lesson{},
+		&models.Enrollment{},
+		&models.Payment{},
+		&models.LessonProgress{}, // Progress Table එක Auto Migration එකට එකතු කළා
+	)
+	if err != nil {
+		log.Println("Failed to auto migrate database models:", err)
 	}
 
 	DB = database

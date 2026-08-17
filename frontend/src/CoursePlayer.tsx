@@ -29,14 +29,23 @@ const CoursePlayer: React.FC = () => {
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [completedLessonIds, setCompletedLessonIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchProgress = () => {
+    API.get(`/progress/${id}`)
+      .then((res) => {
+        setCompletedLessonIds(res.data.completed_lesson_ids || []);
+      })
+      .catch((err) => console.error('Failed to load progress', err));
+  };
 
   useEffect(() => {
     API.get(`/courses/${id}`)
       .then((res) => {
         const fetchedCourse = res.data.course;
         setCourse(fetchedCourse);
-        
+
         if (fetchedCourse?.sections?.length > 0 && fetchedCourse.sections[0].lessons?.length > 0) {
           setSelectedLesson(fetchedCourse.sections[0].lessons[0]);
         }
@@ -46,9 +55,22 @@ const CoursePlayer: React.FC = () => {
         console.error('Failed to load course player:', err);
         setLoading(false);
       });
+
+    fetchProgress();
   }, [id]);
 
-  // Helper to extract YouTube Video Embed URL safely
+  const toggleComplete = async (lessonId: number) => {
+    try {
+      await API.post('/progress/complete', {
+        lesson_id: lessonId,
+        course_id: Number(id),
+      });
+      fetchProgress();
+    } catch (err) {
+      alert('Failed to update lesson status');
+    }
+  };
+
   const getEmbedUrl = (url: string) => {
     if (!url) return '';
     let videoId = '';
@@ -62,20 +84,34 @@ const CoursePlayer: React.FC = () => {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
   };
 
+  // Calculate Progress Percentage
+  const totalLessons = course?.sections?.reduce((acc, sec) => acc + (sec.lessons?.length || 0), 0) || 0;
+  const progressPercent = totalLessons > 0 ? Math.round((completedLessonIds.length / totalLessons) * 100) : 0;
+
   if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>Loading Course Classroom...</div>;
   if (!course) return <div style={{ padding: '20px', textAlign: 'center' }}>Course content not found.</div>;
 
   return (
     <div style={{ fontFamily: 'sans-serif', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Top Bar */}
+      {/* Top Bar with Progress Bar */}
       <div style={{ background: '#2c3e50', color: '#fff', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, fontSize: '20px' }}>{course.title}</h2>
-        <button 
-          onClick={() => navigate('/my-courses')} 
+        <div>
+          <h2 style={{ margin: 0, fontSize: '20px' }}>{course.title}</h2>
+          <div style={{ fontSize: '13px', color: '#bdc3c7', marginTop: '4px' }}>
+            Progress: {progressPercent}% ({completedLessonIds.length}/{totalLessons} Lessons)
+          </div>
+        </div>
+        <button
+          onClick={() => navigate('/my-courses')}
           style={{ background: '#7f8c8d', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer' }}
         >
           &larr; Back to My Courses
         </button>
+      </div>
+
+      {/* Progress Bar Line */}
+      <div style={{ width: '100%', backgroundColor: '#ecf0f1', height: '6px' }}>
+        <div style={{ width: `${progressPercent}%`, backgroundColor: '#2ecc71', height: '100%', transition: 'width 0.3s' }}></div>
       </div>
 
       {/* Main Content Layout */}
@@ -84,12 +120,28 @@ const CoursePlayer: React.FC = () => {
         <div style={{ flex: 3, padding: '20px', backgroundColor: '#fdfdfd' }}>
           {selectedLesson ? (
             <div>
-              <h3>{selectedLesson.title}</h3>
-              <hr />
-              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 style={{ margin: 0 }}>{selectedLesson.title}</h3>
+                <button
+                  onClick={() => toggleComplete(selectedLesson.id)}
+                  style={{
+                    padding: '8px 15px',
+                    backgroundColor: completedLessonIds.includes(selectedLesson.id) ? '#27ae60' : '#e67e22',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {completedLessonIds.includes(selectedLesson.id) ? '✓ Completed' : 'Mark as Complete'}
+                </button>
+              </div>
+              <hr style={{ margin: '15px 0' }} />
+
               {/* Video Player Section */}
               {selectedLesson.video_url && (
-                <div style={{ marginBottom: '20px', marginTop: '15px' }}>
+                <div style={{ marginBottom: '20px' }}>
                   <iframe
                     width="100%"
                     height="450"
@@ -105,7 +157,7 @@ const CoursePlayer: React.FC = () => {
 
               {/* Text / Article Content Section */}
               {selectedLesson.content && (
-                <div style={{ background: '#fff', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', marginTop: '15px' }}>
+                <div style={{ background: '#fff', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
                   <h4>Lesson Notes:</h4>
                   <p style={{ lineHeight: '1.6', whiteSpace: 'pre-line' }}>{selectedLesson.content}</p>
                 </div>
@@ -125,24 +177,32 @@ const CoursePlayer: React.FC = () => {
               <div key={section.id} style={{ marginBottom: '15px' }}>
                 <strong style={{ display: 'block', padding: '5px 0', color: '#34495e' }}>{section.title}</strong>
                 <ul style={{ listStyle: 'none', paddingLeft: 0, margin: 0 }}>
-                  {section.lessons && section.lessons.map((lesson) => (
-                    <li
-                      key={lesson.id}
-                      onClick={() => setSelectedLesson(lesson)}
-                      style={{
-                        padding: '10px',
-                        marginBottom: '5px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        backgroundColor: selectedLesson?.id === lesson.id ? '#3498db' : '#fff',
-                        color: selectedLesson?.id === lesson.id ? '#fff' : '#333',
-                        border: '1px solid #e2e8f0',
-                        fontSize: '14px',
-                      }}
-                    >
-                      ▶ {lesson.title}
-                    </li>
-                  ))}
+                  {section.lessons &&
+                    section.lessons.map((lesson) => {
+                      const isDone = completedLessonIds.includes(lesson.id);
+                      return (
+                        <li
+                          key={lesson.id}
+                          onClick={() => setSelectedLesson(lesson)}
+                          style={{
+                            padding: '10px',
+                            marginBottom: '5px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            backgroundColor: selectedLesson?.id === lesson.id ? '#3498db' : '#fff',
+                            color: selectedLesson?.id === lesson.id ? '#fff' : '#333',
+                            border: '1px solid #e2e8f0',
+                            fontSize: '14px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
+                          <span>▶ {lesson.title}</span>
+                          {isDone && <span style={{ color: selectedLesson?.id === lesson.id ? '#fff' : '#27ae60', fontWeight: 'bold' }}>✓</span>}
+                        </li>
+                      );
+                    })}
                 </ul>
               </div>
             ))
