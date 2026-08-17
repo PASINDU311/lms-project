@@ -31,16 +31,24 @@ func SetupRouter() *gin.Engine {
 		authGroup.POST("/login", controllers.Login)
 	}
 
+	// Public Course Routes (ඕනෑම අයෙකුට පාඨමාලා බලාගත හැක)
+	r.GET("/api/courses", controllers.GetCourses)
+	r.GET("/api/courses/:id", controllers.GetCourseByID)
+
 	// Protected Routes (JWT Required)
 	protected := r.Group("/api")
 	protected.Use(middlewares.AuthMiddleware())
 	{
 		protected.GET("/profile", controllers.GetProfile)
 
-		// Admin Only Route Example
-		protected.GET("/admin/dashboard", middlewares.RoleMiddleware("ADMIN"), func(c *gin.Context) {
-			c.JSON(200, gin.H{"message": "Welcome to Admin Dashboard!"})
-		})
+		// Instructor සහ Admin හට පමණක් Course Create/Update/Delete කල හැක
+		courseAdmin := protected.Group("/courses")
+		courseAdmin.Use(middlewares.RoleMiddleware("INSTRUCTOR", "ADMIN"))
+		{
+			courseAdmin.POST("", controllers.CreateCourse)
+			courseAdmin.PUT("/:id", controllers.UpdateCourse)
+			courseAdmin.DELETE("/:id", controllers.DeleteCourse)
+		}
 	}
 
 	return r
