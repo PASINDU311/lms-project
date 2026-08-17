@@ -41,6 +41,10 @@ func SetupRouter() *gin.Engine {
 	{
 		protected.GET("/profile", controllers.GetProfile)
 
+		// Student / User Enrollment Routes
+		protected.POST("/enrollments", controllers.EnrollCourse)
+		protected.GET("/my-courses", controllers.GetMyEnrollments)
+
 		// Instructor / Admin Only Routes
 		instructorAdmin := protected.Group("")
 		instructorAdmin.Use(middlewares.RoleMiddleware("INSTRUCTOR", "ADMIN"))
