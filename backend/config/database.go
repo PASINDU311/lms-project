@@ -15,30 +15,26 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	// .env file එක load කිරීම
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("Warning: .env file not found, using environment variables")
 	}
 
-	// .env file එකෙන් විස්තර ලබාගැනීම
 	dbUser := os.Getenv("DB_USER")
 	dbPassword := os.Getenv("DB_PASSWORD")
 	dbHost := os.Getenv("DB_HOST")
 	dbPort := os.Getenv("DB_PORT")
 	dbName := os.Getenv("DB_NAME")
 
-	// MySQL Connection String එක සෑදීම
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		dbUser, dbPassword, dbHost, dbPort, dbName)
 
-	// GORM හරහා MySQL වලට connect වීම
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	// Database Tables Auto Migration
+	// Quiz Models ටික AutoMigrate එකට එකතු කළා
 	err = database.AutoMigrate(
 		&models.User{},
 		&models.Course{},
@@ -46,7 +42,11 @@ func ConnectDatabase() {
 		&models.Lesson{},
 		&models.Enrollment{},
 		&models.Payment{},
-		&models.LessonProgress{}, // Progress Table එක Auto Migration එකට එකතු කළා
+		&models.LessonProgress{},
+		&models.Quiz{},
+		&models.Question{},
+		&models.Option{},
+		&models.QuizResult{},
 	)
 	if err != nil {
 		log.Println("Failed to auto migrate database models:", err)

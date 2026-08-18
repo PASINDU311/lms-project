@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from './api';
+import QuizPlayer from './QuizPlayer';
+import Certificate from './Certificate';
 
 interface Lesson {
   id: number;
@@ -29,8 +31,11 @@ const CoursePlayer: React.FC = () => {
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [selectedSectionId, setSelectedSectionId] = useState<number | null>(null);
   const [completedLessonIds, setCompletedLessonIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [studentName, setStudentName] = useState<string>('Student');
+  const [showCertificate, setShowCertificate] = useState<boolean>(false);
 
   const fetchProgress = () => {
     API.get(`/progress/${id}`)
@@ -41,13 +46,25 @@ const CoursePlayer: React.FC = () => {
   };
 
   useEffect(() => {
+    // Fetch Student Profile Info for Certificate
+    API.get('/auth/me')
+      .then((res) => {
+        if (res.data?.name) {
+          setStudentName(res.data.name);
+        }
+      })
+      .catch(() => console.log('Could not fetch user name'));
+
     API.get(`/courses/${id}`)
       .then((res) => {
         const fetchedCourse = res.data.course;
         setCourse(fetchedCourse);
 
-        if (fetchedCourse?.sections?.length > 0 && fetchedCourse.sections[0].lessons?.length > 0) {
-          setSelectedLesson(fetchedCourse.sections[0].lessons[0]);
+        if (fetchedCourse?.sections?.length > 0) {
+          setSelectedSectionId(fetchedCourse.sections[0].id);
+          if (fetchedCourse.sections[0].lessons?.length > 0) {
+            setSelectedLesson(fetchedCourse.sections[0].lessons[0]);
+          }
         }
         setLoading(false);
       })
@@ -93,6 +110,16 @@ const CoursePlayer: React.FC = () => {
 
   return (
     <div style={{ fontFamily: 'sans-serif', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Certificate Modal */}
+      {showCertificate && (
+        <Certificate
+          studentName={studentName}
+          courseTitle={course.title}
+          completionDate={new Date().toLocaleDateString()}
+          onClose={() => setShowCertificate(false)}
+        />
+      )}
+
       {/* Top Bar with Progress Bar */}
       <div style={{ background: '#2c3e50', color: '#fff', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
@@ -101,12 +128,22 @@ const CoursePlayer: React.FC = () => {
             Progress: {progressPercent}% ({completedLessonIds.length}/{totalLessons} Lessons)
           </div>
         </div>
-        <button
-          onClick={() => navigate('/my-courses')}
-          style={{ background: '#7f8c8d', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          &larr; Back to My Courses
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          {progressPercent === 100 && (
+            <button
+              onClick={() => setShowCertificate(true)}
+              style={{ background: '#f1c40f', color: '#2c3e50', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              🏆 View Certificate
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/my-courses')}
+            style={{ background: '#7f8c8d', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer' }}
+          >
+            &larr; Back to My Courses
+          </button>
+        </div>
       </div>
 
       {/* Progress Bar Line */}
@@ -116,7 +153,7 @@ const CoursePlayer: React.FC = () => {
 
       {/* Main Content Layout */}
       <div style={{ display: 'flex', flex: 1 }}>
-        {/* Left Side: Video / Content Player */}
+        {/* Left Side: Video / Content Player & Quiz */}
         <div style={{ flex: 3, padding: '20px', backgroundColor: '#fdfdfd' }}>
           {selectedLesson ? (
             <div>
@@ -157,7 +194,7 @@ const CoursePlayer: React.FC = () => {
 
               {/* Text / Article Content Section */}
               {selectedLesson.content && (
-                <div style={{ background: '#fff', padding: '20px', border: '1px solid #ddd', borderRadius: '8px' }}>
+                <div style={{ background: '#fff', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '20px' }}>
                   <h4>Lesson Notes:</h4>
                   <p style={{ lineHeight: '1.6', whiteSpace: 'pre-line' }}>{selectedLesson.content}</p>
                 </div>
@@ -165,6 +202,13 @@ const CoursePlayer: React.FC = () => {
             </div>
           ) : (
             <p>Please select a lesson from the syllabus to start learning.</p>
+          )}
+
+          {/* Section Quiz Section */}
+          {selectedSectionId && (
+            <div style={{ marginTop: '30px' }}>
+              <QuizPlayer sectionId={selectedSectionId} />
+            </div>
           )}
         </div>
 
@@ -183,7 +227,10 @@ const CoursePlayer: React.FC = () => {
                       return (
                         <li
                           key={lesson.id}
-                          onClick={() => setSelectedLesson(lesson)}
+                          onClick={() => {
+                            setSelectedLesson(lesson);
+                            setSelectedSectionId(section.id);
+                          }}
                           style={{
                             padding: '10px',
                             marginBottom: '5px',

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from './api';
+import QuizBuilder from './QuizBuilder';
 
 interface Lesson {
   id: number;
@@ -48,6 +49,9 @@ const CourseBuilder: React.FC = () => {
   const [editLessonTitle, setEditLessonTitle] = useState('');
   const [editLessonVideoUrl, setEditLessonVideoUrl] = useState('');
   const [editLessonContent, setEditLessonContent] = useState('');
+
+  // Quiz Toggle State
+  const [activeQuizSectionId, setActiveQuizSectionId] = useState<number | null>(null);
 
   const fetchCourseDetails = () => {
     API.get(`/courses/${id}`)
@@ -218,10 +222,22 @@ const CourseBuilder: React.FC = () => {
                     Edit Title
                   </button>
                   <button
-                    onClick={() => setSelectedSectionId(selectedSectionId === section.id ? null : section.id)}
+                    onClick={() => {
+                      setSelectedSectionId(selectedSectionId === section.id ? null : section.id);
+                      setActiveQuizSectionId(null);
+                    }}
                     style={{ padding: '5px 10px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px', marginRight: '5px' }}
                   >
                     {selectedSectionId === section.id ? 'Cancel' : '+ Add Lesson'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveQuizSectionId(activeQuizSectionId === section.id ? null : section.id);
+                      setSelectedSectionId(null);
+                    }}
+                    style={{ padding: '5px 10px', background: '#8e44ad', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px', marginRight: '5px' }}
+                  >
+                    {activeQuizSectionId === section.id ? 'Cancel Quiz' : '+ Add Quiz'}
                   </button>
                   <button
                     onClick={() => handleDeleteSection(section.id)}
@@ -263,6 +279,17 @@ const CourseBuilder: React.FC = () => {
                   Save Lesson
                 </button>
               </form>
+            )}
+
+            {/* Add Quiz Form */}
+            {activeQuizSectionId === section.id && (
+              <QuizBuilder
+                sectionId={section.id}
+                onQuizCreated={() => {
+                  setActiveQuizSectionId(null);
+                  fetchCourseDetails();
+                }}
+              />
             )}
 
             {/* Lessons List */}

@@ -49,6 +49,10 @@ func SetupRouter() *gin.Engine {
 		protected.POST("/enrollments", controllers.EnrollCourse)
 		protected.GET("/my-courses", controllers.GetMyEnrollments)
 
+		// Quiz Routes (Student)
+		protected.GET("/quizzes/section/:section_id", controllers.GetQuizBySection)
+		protected.POST("/quizzes/submit", controllers.SubmitQuiz)
+
 		// Instructor / Admin Only Routes
 		instructorAdmin := protected.Group("")
 		instructorAdmin.Use(middlewares.RoleMiddleware("INSTRUCTOR", "ADMIN"))
@@ -67,6 +71,9 @@ func SetupRouter() *gin.Engine {
 			instructorAdmin.POST("/lessons", controllers.CreateLesson)
 			instructorAdmin.PUT("/lessons/:id", controllers.UpdateLesson)
 			instructorAdmin.DELETE("/lessons/:id", controllers.DeleteLesson)
+
+			// Quiz Management (Instructor / Admin)
+			instructorAdmin.POST("/quizzes", controllers.CreateQuiz)
 		}
 	}
 
