@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import API from './api';
 import QuizPlayer from './QuizPlayer';
 import Certificate from './Certificate';
+import AssignmentPlayer from './AssignmentPlayer';
+import CourseReviews from './CourseReviews';
 
 interface Lesson {
   id: number;
@@ -46,7 +48,6 @@ const CoursePlayer: React.FC = () => {
   };
 
   useEffect(() => {
-    // Fetch Student Profile Info for Certificate
     API.get('/auth/me')
       .then((res) => {
         if (res.data?.name) {
@@ -101,7 +102,6 @@ const CoursePlayer: React.FC = () => {
     return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
   };
 
-  // Calculate Progress Percentage
   const totalLessons = course?.sections?.reduce((acc, sec) => acc + (sec.lessons?.length || 0), 0) || 0;
   const progressPercent = totalLessons > 0 ? Math.round((completedLessonIds.length / totalLessons) * 100) : 0;
 
@@ -110,7 +110,6 @@ const CoursePlayer: React.FC = () => {
 
   return (
     <div style={{ fontFamily: 'sans-serif', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      {/* Certificate Modal */}
       {showCertificate && (
         <Certificate
           studentName={studentName}
@@ -120,7 +119,7 @@ const CoursePlayer: React.FC = () => {
         />
       )}
 
-      {/* Top Bar with Progress Bar */}
+      {/* Top Bar */}
       <div style={{ background: '#2c3e50', color: '#fff', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '20px' }}>{course.title}</h2>
@@ -153,7 +152,7 @@ const CoursePlayer: React.FC = () => {
 
       {/* Main Content Layout */}
       <div style={{ display: 'flex', flex: 1 }}>
-        {/* Left Side: Video / Content Player & Quiz */}
+        {/* Left Side: Video, Notes, Quiz & Assignment */}
         <div style={{ flex: 3, padding: '20px', backgroundColor: '#fdfdfd' }}>
           {selectedLesson ? (
             <div>
@@ -176,7 +175,7 @@ const CoursePlayer: React.FC = () => {
               </div>
               <hr style={{ margin: '15px 0' }} />
 
-              {/* Video Player Section */}
+              {/* Video Player */}
               {selectedLesson.video_url && (
                 <div style={{ marginBottom: '20px' }}>
                   <iframe
@@ -192,7 +191,7 @@ const CoursePlayer: React.FC = () => {
                 </div>
               )}
 
-              {/* Text / Article Content Section */}
+              {/* Text / Notes Content */}
               {selectedLesson.content && (
                 <div style={{ background: '#fff', padding: '20px', border: '1px solid #ddd', borderRadius: '8px', marginBottom: '20px' }}>
                   <h4>Lesson Notes:</h4>
@@ -204,12 +203,24 @@ const CoursePlayer: React.FC = () => {
             <p>Please select a lesson from the syllabus to start learning.</p>
           )}
 
-          {/* Section Quiz Section */}
+          {/* Section Quiz */}
           {selectedSectionId && (
             <div style={{ marginTop: '30px' }}>
               <QuizPlayer sectionId={selectedSectionId} />
             </div>
           )}
+
+          {/* Section Assignment */}
+          {selectedSectionId && (
+            <div style={{ marginTop: '20px' }}>
+              <AssignmentPlayer sectionId={selectedSectionId} />
+            </div>
+          )}
+          
+          {/* Course Reviews */}
+            <div style={{ marginTop: '30px' }}>
+                <CourseReviews courseId={Number(id)} isEnrolled={true} />
+            </div>
         </div>
 
         {/* Right Side: Curriculum Sidebar */}

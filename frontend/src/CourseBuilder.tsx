@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from './api';
 import QuizBuilder from './QuizBuilder';
+import InstructorAssignmentManager from './InstructorAssignmentManager';
 
 interface Lesson {
   id: number;
@@ -359,6 +360,12 @@ const CourseBuilder: React.FC = () => {
                 <li style={{ fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>No lessons in this section yet.</li>
               )}
             </ul>
+
+            {/* Instructor Assignment Manager Integration */}
+            <InstructorAssignmentManager 
+              sectionId={section.id} 
+              sectionTitle={section.title} 
+            />
           </div>
         ))
       ) : (

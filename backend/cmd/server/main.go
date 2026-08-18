@@ -15,12 +15,19 @@ func main() {
 
 	// 2. GORM Auto-Migration
 	err := config.DB.AutoMigrate(
-		&models.User{},
-		&models.Course{},
-		&models.Section{},
-		&models.Lesson{},
-		&models.Enrollment{},
-		&models.Payment{},
+    	&models.User{},
+    	&models.Course{},
+    	&models.Section{},
+    	&models.Lesson{},
+    	&models.Enrollment{},
+    	&models.Payment{},
+    	&models.Quiz{},
+    	&models.Question{},
+    	&models.Option{},
+    	&models.QuizResult{},
+    	&models.Assignment{},           // Added
+    	&models.AssignmentSubmission{}, // Added
+		&models.Review{},
 	)
 
 	if err != nil {

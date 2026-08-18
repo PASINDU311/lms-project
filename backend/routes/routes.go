@@ -34,6 +34,7 @@ func SetupRouter() *gin.Engine {
 	// Public Course Routes
 	r.GET("/api/courses", controllers.GetCourses)
 	r.GET("/api/courses/:id", controllers.GetCourseByID)
+	r.GET("/api/courses/:id/reviews", controllers.GetCourseReviews)
 
 	// Protected Routes (JWT Required)
 	protected := r.Group("/api")
@@ -52,6 +53,14 @@ func SetupRouter() *gin.Engine {
 		// Quiz Routes (Student)
 		protected.GET("/quizzes/section/:section_id", controllers.GetQuizBySection)
 		protected.POST("/quizzes/submit", controllers.SubmitQuiz)
+
+		// Assignment Routes (Student)
+		protected.GET("/assignments/section/:section_id", controllers.GetAssignmentsBySection)
+		protected.POST("/assignments/submit", controllers.SubmitAssignment)
+		protected.GET("/assignments/:assignment_id/my-submission", controllers.GetMySubmission) // 👈 🔥 මෙන්න මේ පේලිය එකතු වුණා!
+
+		// Review Routes
+		protected.POST("/reviews", controllers.AddOrUpdateReview)
 
 		// Instructor / Admin Only Routes
 		instructorAdmin := protected.Group("")
@@ -74,6 +83,11 @@ func SetupRouter() *gin.Engine {
 
 			// Quiz Management (Instructor / Admin)
 			instructorAdmin.POST("/quizzes", controllers.CreateQuiz)
+
+			// Assignment Management (Instructor)
+			instructorAdmin.POST("/assignments", controllers.CreateAssignment)
+			instructorAdmin.GET("/assignments/:assignment_id/submissions", controllers.GetAssignmentSubmissions)
+			instructorAdmin.PUT("/assignments/submissions/:submission_id/grade", controllers.GradeAssignment)
 		}
 	}
 
