@@ -50,6 +50,9 @@ func SetupRouter() *gin.Engine {
 		protected.POST("/enrollments", controllers.EnrollCourse)
 		protected.GET("/my-courses", controllers.GetMyEnrollments)
 
+		// Student Analytics Overview 🔥 NEW
+		protected.GET("/analytics/student", controllers.GetStudentAnalytics)
+
 		// Quiz Routes (Student)
 		protected.GET("/quizzes/section/:section_id", controllers.GetQuizBySection)
 		protected.POST("/quizzes/submit", controllers.SubmitQuiz)
@@ -57,7 +60,7 @@ func SetupRouter() *gin.Engine {
 		// Assignment Routes (Student)
 		protected.GET("/assignments/section/:section_id", controllers.GetAssignmentsBySection)
 		protected.POST("/assignments/submit", controllers.SubmitAssignment)
-		protected.GET("/assignments/:assignment_id/my-submission", controllers.GetMySubmission) // 👈 🔥 මෙන්න මේ පේලිය එකතු වුණා!
+		protected.GET("/assignments/:assignment_id/my-submission", controllers.GetMySubmission)
 
 		// Review Routes
 		protected.POST("/reviews", controllers.AddOrUpdateReview)
@@ -66,6 +69,9 @@ func SetupRouter() *gin.Engine {
 		instructorAdmin := protected.Group("")
 		instructorAdmin.Use(middlewares.RoleMiddleware("INSTRUCTOR", "ADMIN"))
 		{
+			// Admin Analytics 🔥 NEW
+			instructorAdmin.GET("/analytics/admin", controllers.GetAdminAnalytics)
+
 			// Course Management
 			instructorAdmin.POST("/courses", controllers.CreateCourse)
 			instructorAdmin.PUT("/courses/:id", controllers.UpdateCourse)
@@ -88,6 +94,14 @@ func SetupRouter() *gin.Engine {
 			instructorAdmin.POST("/assignments", controllers.CreateAssignment)
 			instructorAdmin.GET("/assignments/:assignment_id/submissions", controllers.GetAssignmentSubmissions)
 			instructorAdmin.PUT("/assignments/submissions/:submission_id/grade", controllers.GradeAssignment)
+
+			// User Management & Moderation (Admin Only)
+			instructorAdmin.GET("/users", controllers.GetAllUsers)
+			instructorAdmin.PUT("/users/:id/role", controllers.UpdateUserRole)
+			instructorAdmin.DELETE("/users/:id", controllers.DeleteUser)
+			instructorAdmin.DELETE("/reviews/:id", controllers.DeleteReview)
+
+			instructorAdmin.POST("/users/create", controllers.CreateUserByAdmin)
 		}
 	}
 

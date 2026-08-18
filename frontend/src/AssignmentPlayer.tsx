@@ -30,8 +30,18 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
   const [submissionContent, setSubmissionContent] = useState<{ [key: number]: string }>({});
   const [submissionUrl, setSubmissionUrl] = useState<{ [key: number]: string }>({});
   const [submitting, setSubmitting] = useState<number | null>(null);
+  const [userRole, setUserRole] = useState<string>('STUDENT');
 
   useEffect(() => {
+    // Logged-in User Role එක Check කරගැනීම
+    API.get('/profile')
+      .then((res) => {
+        if (res.data?.user?.role) {
+          setUserRole(res.data.user.role);
+        }
+      })
+      .catch(() => console.log('Could not fetch user profile'));
+
     fetchAssignmentsAndSubmissions();
   }, [sectionId]);
 
@@ -41,7 +51,7 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
       const assignList: Assignment[] = res.data.assignments || [];
       setAssignments(assignList);
 
-      // Student ගේ කලින් Submissions තියෙනවද බලනවා
+      // Student කෙනෙක් නම් විතරක් කලින් කරපු Submissions Check කරනවා
       assignList.forEach(async (a) => {
         try {
           const subRes = await API.get(`/assignments/${a.id}/my-submission`);
@@ -49,7 +59,7 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
             setSubmissions((prev) => ({ ...prev, [a.id]: subRes.data.submission }));
           }
         } catch (err) {
-          // No submission yet for this assignment
+          // No submission yet
         }
       });
     } catch (err) {
@@ -91,8 +101,13 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
               <strong>Max Marks:</strong> {a.max_marks}
             </div>
 
-            {/* Submission Status & Grade View Section */}
-            {submission ? (
+            {/* Instructor / Admin ට Submit Form එක පෙන්වන්නේ නැත (Notice පමණි) */}
+            {userRole === 'ADMIN' || userRole === 'INSTRUCTOR' ? (
+              <div style={{ padding: '8px 12px', background: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
+                ℹ️ Instructor/Admin View: Submissions and Grading options are available in Course Builder.
+              </div>
+            ) : submission ? (
+              /* Student: Submission Status & Grade View */
               <div style={{ padding: '12px', background: submission.status === 'GRADED' ? '#e8f8f5' : '#fef9e7', border: '1px solid #ddd', borderRadius: '6px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <strong style={{ fontSize: '14px', color: submission.status === 'GRADED' ? '#27ae60' : '#d35400' }}>
@@ -103,7 +118,6 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                   </span>
                 </div>
 
-                {/* 🌟 Marks & Instructor Feedback (Display to Student) */}
                 {submission.status === 'GRADED' && (
                   <div style={{ marginTop: '10px', padding: '10px', background: '#fff', borderRadius: '4px', border: '1px solid #2ecc71' }}>
                     <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#27ae60' }}>
@@ -130,7 +144,7 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                 </div>
               </div>
             ) : (
-              /* Submission Form */
+              /* Student: Submission Form */
               <div style={{ marginTop: '10px', padding: '10px', background: '#fafafa', borderRadius: '4px', border: '1px solid #eee' }}>
                 <div style={{ marginBottom: '8px' }}>
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>Text Answer / Notes:</label>

@@ -37,6 +37,7 @@ const CoursePlayer: React.FC = () => {
   const [completedLessonIds, setCompletedLessonIds] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [studentName, setStudentName] = useState<string>('Student');
+  const [userRole, setUserRole] = useState<string>('STUDENT');
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
 
   const fetchProgress = () => {
@@ -48,13 +49,15 @@ const CoursePlayer: React.FC = () => {
   };
 
   useEffect(() => {
-    API.get('/auth/me')
+    // Current User Profile & Role Fetch
+    API.get('/profile')
       .then((res) => {
-        if (res.data?.name) {
-          setStudentName(res.data.name);
+        if (res.data?.user) {
+          setStudentName(res.data.user.name || 'User');
+          setUserRole(res.data.user.role || 'STUDENT');
         }
       })
-      .catch(() => console.log('Could not fetch user name'));
+      .catch(() => console.log('Could not fetch user profile'));
 
     API.get(`/courses/${id}`)
       .then((res) => {
@@ -105,6 +108,8 @@ const CoursePlayer: React.FC = () => {
   const totalLessons = course?.sections?.reduce((acc, sec) => acc + (sec.lessons?.length || 0), 0) || 0;
   const progressPercent = totalLessons > 0 ? Math.round((completedLessonIds.length / totalLessons) * 100) : 0;
 
+  const isInstructorOrAdmin = userRole === 'INSTRUCTOR' || userRole === 'ADMIN';
+
   if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>Loading Course Classroom...</div>;
   if (!course) return <div style={{ padding: '20px', textAlign: 'center' }}>Course content not found.</div>;
 
@@ -123,12 +128,14 @@ const CoursePlayer: React.FC = () => {
       <div style={{ background: '#2c3e50', color: '#fff', padding: '15px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '20px' }}>{course.title}</h2>
-          <div style={{ fontSize: '13px', color: '#bdc3c7', marginTop: '4px' }}>
-            Progress: {progressPercent}% ({completedLessonIds.length}/{totalLessons} Lessons)
-          </div>
+          {!isInstructorOrAdmin && (
+            <div style={{ fontSize: '13px', color: '#bdc3c7', marginTop: '4px' }}>
+              Progress: {progressPercent}% ({completedLessonIds.length}/{totalLessons} Lessons)
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
-          {progressPercent === 100 && (
+          {!isInstructorOrAdmin && progressPercent === 100 && (
             <button
               onClick={() => setShowCertificate(true)}
               style={{ background: '#f1c40f', color: '#2c3e50', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
@@ -137,41 +144,45 @@ const CoursePlayer: React.FC = () => {
             </button>
           )}
           <button
-            onClick={() => navigate('/my-courses')}
+            onClick={() => navigate(isInstructorOrAdmin ? '/dashboard' : '/my-courses')}
             style={{ background: '#7f8c8d', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer' }}
           >
-            &larr; Back to My Courses
+            &larr; Back to Dashboard
           </button>
         </div>
       </div>
 
-      {/* Progress Bar Line */}
-      <div style={{ width: '100%', backgroundColor: '#ecf0f1', height: '6px' }}>
-        <div style={{ width: `${progressPercent}%`, backgroundColor: '#2ecc71', height: '100%', transition: 'width 0.3s' }}></div>
-      </div>
+      {/* Student Progress Bar Line */}
+      {!isInstructorOrAdmin && (
+        <div style={{ width: '100%', backgroundColor: '#ecf0f1', height: '6px' }}>
+          <div style={{ width: `${progressPercent}%`, backgroundColor: '#2ecc71', height: '100%', transition: 'width 0.3s' }}></div>
+        </div>
+      )}
 
       {/* Main Content Layout */}
       <div style={{ display: 'flex', flex: 1 }}>
-        {/* Left Side: Video, Notes, Quiz & Assignment */}
+        {/* Left Side Content */}
         <div style={{ flex: 3, padding: '20px', backgroundColor: '#fdfdfd' }}>
           {selectedLesson ? (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <h3 style={{ margin: 0 }}>{selectedLesson.title}</h3>
-                <button
-                  onClick={() => toggleComplete(selectedLesson.id)}
-                  style={{
-                    padding: '8px 15px',
-                    backgroundColor: completedLessonIds.includes(selectedLesson.id) ? '#27ae60' : '#e67e22',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  {completedLessonIds.includes(selectedLesson.id) ? '✓ Completed' : 'Mark as Complete'}
-                </button>
+                {!isInstructorOrAdmin && (
+                  <button
+                    onClick={() => toggleComplete(selectedLesson.id)}
+                    style={{
+                      padding: '8px 15px',
+                      backgroundColor: completedLessonIds.includes(selectedLesson.id) ? '#27ae60' : '#e67e22',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {completedLessonIds.includes(selectedLesson.id) ? '✓ Completed' : 'Mark as Complete'}
+                  </button>
+                )}
               </div>
               <hr style={{ margin: '15px 0' }} />
 
@@ -200,11 +211,11 @@ const CoursePlayer: React.FC = () => {
               )}
             </div>
           ) : (
-            <p>Please select a lesson from the syllabus to start learning.</p>
+            <p>Please select a lesson from the syllabus.</p>
           )}
 
-          {/* Section Quiz */}
-          {selectedSectionId && (
+          {/* Section Quiz (Student එකට විතරයි) */}
+          {selectedSectionId && !isInstructorOrAdmin && (
             <div style={{ marginTop: '30px' }}>
               <QuizPlayer sectionId={selectedSectionId} />
             </div>
@@ -216,11 +227,11 @@ const CoursePlayer: React.FC = () => {
               <AssignmentPlayer sectionId={selectedSectionId} />
             </div>
           )}
-          
+
           {/* Course Reviews */}
-            <div style={{ marginTop: '30px' }}>
-                <CourseReviews courseId={Number(id)} isEnrolled={true} />
-            </div>
+          <div style={{ marginTop: '30px' }}>
+            <CourseReviews courseId={Number(id)} isEnrolled={!isInstructorOrAdmin} />
+          </div>
         </div>
 
         {/* Right Side: Curriculum Sidebar */}
@@ -257,7 +268,9 @@ const CoursePlayer: React.FC = () => {
                           }}
                         >
                           <span>▶ {lesson.title}</span>
-                          {isDone && <span style={{ color: selectedLesson?.id === lesson.id ? '#fff' : '#27ae60', fontWeight: 'bold' }}>✓</span>}
+                          {!isInstructorOrAdmin && isDone && (
+                            <span style={{ color: selectedLesson?.id === lesson.id ? '#fff' : '#27ae60', fontWeight: 'bold' }}>✓</span>
+                          )}
                         </li>
                       );
                     })}

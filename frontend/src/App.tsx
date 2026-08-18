@@ -10,12 +10,13 @@ import CoursePlayer from './CoursePlayer';
 import CourseBuilder from './CourseBuilder';
 
 const App: React.FC = () => {
-  const token = sessionStorage.getItem('token');
+  const token = sessionStorage.getItem('token') || localStorage.getItem('token');
 
   return (
     <Router>
       <Routes>
         <Route path="/" element={!token ? <Login /> : <Navigate to="/dashboard" />} />
+        <Route path="/login" element={!token ? <Login /> : <Navigate to="/dashboard" />} />
         <Route path="/register" element={!token ? <Register /> : <Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/" />} />
         <Route path="/courses/:id" element={token ? <CourseDetail /> : <Navigate to="/" />} />

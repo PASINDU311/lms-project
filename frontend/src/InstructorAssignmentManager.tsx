@@ -1,25 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import API from './api';
 
 interface Assignment {
   id: number;
-  section_id: number;
   title: string;
   description: string;
   max_marks: number;
-  due_date?: string;
 }
 
 interface Submission {
   id: number;
   user_id: number;
-  user?: { name: string; email: string };
   submission_url: string;
   content: string;
-  marks?: number;
-  feedback?: string;
   status: string;
-  created_at: string;
+  marks: number | null;
+  feedback: string;
+  User?: {
+    name: string;
+    email: string;
+  };
 }
 
 interface Props {
@@ -29,41 +29,33 @@ interface Props {
 
 const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle }) => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [selectedAssignment, setSelectedAssignment] = useState<Assignment | null>(null);
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  
-  // New Assignment Form State
   const [showCreateForm, setShowCreateForm] = useState(false);
+
+  // New Assignment Form State
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [maxMarks, setMaxMarks] = useState(100);
+  const [maxMarks, setMaxMarks] = useState<number>(100);
 
-  // Grading State
-  const [gradingSubmissionId, setGradingSubmissionId] = useState<number | null>(null);
-  const [marksInput, setMarksInput] = useState<number>(0);
-  const [feedbackInput, setFeedbackInput] = useState<string>('');
+  // Submissions State for Grading
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+
+  // Grading Inputs State
+  const [gradingMarks, setGradingMarks] = useState<{ [key: number]: number }>({});
+  const [gradingFeedback, setGradingFeedback] = useState<{ [key: number]: string }>({});
 
   useEffect(() => {
     fetchAssignments();
   }, [sectionId]);
 
-  const fetchAssignments = () => {
-    API.get(`/assignments/section/${sectionId}`)
-      .then((res) => {
-        const list = res.data.assignments || [];
-        setAssignments(list);
-        if (list.length > 0 && !selectedAssignment) {
-          setSelectedAssignment(list[0]);
-          fetchSubmissions(list[0].id);
-        }
-      })
-      .catch((err) => console.error('Failed to fetch assignments', err));
-  };
-
-  const fetchSubmissions = (assignmentId: number) => {
-    API.get(`/assignments/${assignmentId}/submissions`)
-      .then((res) => setSubmissions(res.data.submissions || []))
-      .catch((err) => console.error('Failed to fetch submissions', err));
+  const fetchAssignments = async () => {
+    try {
+      const res = await API.get(`/assignments/section/${sectionId}`);
+      setAssignments(res.data.assignments || []);
+    } catch (err) {
+      console.error('Failed to load assignments', err);
+    }
   };
 
   const handleCreateAssignment = async (e: React.FormEvent) => {
@@ -78,6 +70,7 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
       alert('Assignment created successfully!');
       setTitle('');
       setDescription('');
+      setMaxMarks(100);
       setShowCreateForm(false);
       fetchAssignments();
     } catch (err: any) {
@@ -85,180 +78,173 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
     }
   };
 
+  // 📝 Fetch Submissions to Grade
+  const handleViewSubmissions = async (assignmentId: number) => {
+    if (selectedAssignmentId === assignmentId) {
+      setSelectedAssignmentId(null);
+      return;
+    }
+    setSelectedAssignmentId(assignmentId);
+    setLoadingSubmissions(true);
+    try {
+      const res = await API.get(`/assignments/${assignmentId}/submissions`);
+      setSubmissions(res.data.submissions || []);
+      setLoadingSubmissions(false);
+    } catch (err) {
+      console.error('Failed to fetch submissions', err);
+      setLoadingSubmissions(false);
+    }
+  };
+
+  // 💯 Submit Grade & Feedback
   const handleGradeSubmission = async (submissionId: number) => {
+    const marks = gradingMarks[submissionId];
+    const feedback = gradingFeedback[submissionId] || '';
+
+    if (marks === undefined || marks === null) {
+      alert('Please enter marks before saving!');
+      return;
+    }
+
     try {
       await API.put(`/assignments/submissions/${submissionId}/grade`, {
-        marks: Number(marksInput),
-        feedback: feedbackInput,
+        marks: Number(marks),
+        feedback: feedback,
       });
-      alert('Grade saved successfully!');
-      setGradingSubmissionId(null);
-      if (selectedAssignment) fetchSubmissions(selectedAssignment.id);
+      alert('Grade & Feedback saved successfully!');
+      if (selectedAssignmentId) {
+        handleViewSubmissions(selectedAssignmentId); // Refresh submissions list
+      }
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save grade');
+      alert(err.response?.data?.error || 'Failed to grade submission');
     }
   };
 
   return (
-    <div style={{ marginTop: '20px', padding: '15px', background: '#f8f9fa', borderRadius: '8px', border: '1px solid #ddd' }}>
+    <div style={{ marginTop: '15px', background: '#f8fafc', padding: '12px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h4 style={{ margin: 0, color: '#2c3e50' }}>📋 Assignments for: {sectionTitle}</h4>
+        <h5 style={{ margin: 0, color: '#334155' }}>📝 Assignments ({assignments.length})</h5>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          style={{ padding: '6px 12px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+          style={{ padding: '4px 8px', background: '#e67e22', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
         >
-          {showCreateForm ? 'Close Form' : '+ Add New Assignment'}
+          {showCreateForm ? 'Cancel' : '+ Add Assignment'}
         </button>
       </div>
 
       {/* Create Assignment Form */}
       {showCreateForm && (
-        <form onSubmit={handleCreateAssignment} style={{ marginTop: '15px', padding: '15px', background: '#fff', border: '1px solid #27ae60', borderRadius: '6px' }}>
-          <h5 style={{ marginTop: 0 }}>Create New Assignment</h5>
-          <div style={{ marginBottom: '10px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold' }}>Title:</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
-            />
-          </div>
-          <div style={{ marginBottom: '10px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold' }}>Description / Instructions:</label>
-            <textarea
-              rows={3}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              required
-              style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
-            />
-          </div>
-          <div style={{ marginBottom: '10px' }}>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold' }}>Max Marks:</label>
+        <form onSubmit={handleCreateAssignment} style={{ marginTop: '10px', background: '#fff', padding: '10px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
+          <input
+            type="text"
+            placeholder="Assignment Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
+            style={{ width: '100%', padding: '6px', marginBottom: '8px', boxSizing: 'border-box' }}
+          />
+          <textarea
+            placeholder="Instructions / Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            required
+            rows={2}
+            style={{ width: '100%', padding: '6px', marginBottom: '8px', boxSizing: 'border-box' }}
+          />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
+            <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Max Marks:</label>
             <input
               type="number"
               value={maxMarks}
               onChange={(e) => setMaxMarks(Number(e.target.value))}
-              style={{ width: '120px', padding: '6px' }}
+              style={{ width: '80px', padding: '4px' }}
             />
           </div>
-          <button type="submit" style={{ padding: '8px 15px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          <button type="submit" style={{ padding: '6px 12px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}>
             Save Assignment
           </button>
         </form>
       )}
 
-      {/* Assignments List & Submissions View */}
-      {assignments.length > 0 ? (
-        <div style={{ marginTop: '15px' }}>
-          <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
-            {assignments.map((a) => (
+      {/* Existing Assignments List */}
+      <div style={{ marginTop: '10px' }}>
+        {assignments.map((assignment) => (
+          <div key={assignment.id} style={{ background: '#fff', padding: '10px', borderRadius: '4px', marginBottom: '8px', border: '1px solid #cbd5e1' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <strong style={{ fontSize: '13px', color: '#1e293b' }}>{assignment.title}</strong>
+                <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#64748b' }}>{assignment.description} (Max Marks: {assignment.max_marks})</p>
+              </div>
               <button
-                key={a.id}
-                onClick={() => {
-                  setSelectedAssignment(a);
-                  fetchSubmissions(a.id);
-                }}
-                style={{
-                  padding: '6px 12px',
-                  background: selectedAssignment?.id === a.id ? '#3498db' : '#fff',
-                  color: selectedAssignment?.id === a.id ? '#fff' : '#333',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
+                onClick={() => handleViewSubmissions(assignment.id)}
+                style={{ padding: '4px 10px', background: '#2980b9', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
               >
-                {a.title}
+                {selectedAssignmentId === assignment.id ? 'Hide Submissions' : 'View Submissions & Grade 🎯'}
               </button>
-            ))}
-          </div>
-
-          {selectedAssignment && (
-            <div style={{ background: '#fff', padding: '15px', borderRadius: '6px', border: '1px solid #ccc' }}>
-              <h5 style={{ margin: '0 0 10px 0' }}>Student Submissions ({submissions.length})</h5>
-
-              {submissions.length === 0 ? (
-                <p style={{ fontSize: '13px', color: '#777' }}>No student submissions yet.</p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {submissions.map((sub) => (
-                    <div key={sub.id} style={{ padding: '10px', border: '1px solid #eee', borderRadius: '4px', background: '#fafafa' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <strong>{sub.user?.name || 'Student'} ({sub.user?.email})</strong>
-                        <span style={{ fontSize: '12px', color: '#888' }}>{new Date(sub.created_at).toLocaleDateString()}</span>
-                      </div>
-                      
-                      {sub.content && <p style={{ fontSize: '13px', margin: '5px 0' }}><strong>Answer:</strong> {sub.content}</p>}
-                      {sub.submission_url && (
-                        <p style={{ fontSize: '13px', margin: '5px 0' }}>
-                          <strong>URL:</strong> <a href={sub.submission_url} target="_blank" rel="noreferrer">{sub.submission_url}</a>
-                        </p>
-                      )}
-
-                      <div style={{ marginTop: '8px', fontSize: '13px' }}>
-                        <strong>Status:</strong> <span style={{ color: sub.status === 'GRADED' ? 'green' : 'orange' }}>{sub.status}</span>
-                        {sub.marks !== undefined && <span> | <strong>Marks:</strong> {sub.marks} / {selectedAssignment.max_marks}</span>}
-                      </div>
-
-                      {/* Grade Action Button */}
-                      {gradingSubmissionId === sub.id ? (
-                        <div style={{ marginTop: '10px', padding: '10px', background: '#fff', border: '1px solid #3498db', borderRadius: '4px' }}>
-                          <div style={{ marginBottom: '8px' }}>
-                            <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Marks ({selectedAssignment.max_marks} Max): </label>
-                            <input
-                              type="number"
-                              value={marksInput}
-                              onChange={(e) => setMarksInput(Number(e.target.value))}
-                              style={{ width: '80px', padding: '4px', marginLeft: '5px' }}
-                            />
-                          </div>
-                          <div style={{ marginBottom: '8px' }}>
-                            <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block' }}>Feedback: </label>
-                            <input
-                              type="text"
-                              value={feedbackInput}
-                              onChange={(e) => setFeedbackInput(e.target.value)}
-                              placeholder="Great job! / Need improvements..."
-                              style={{ width: '100%', padding: '4px', boxSizing: 'border-box' }}
-                            />
-                          </div>
-                          <button
-                            onClick={() => handleGradeSubmission(sub.id)}
-                            style={{ padding: '4px 10px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', marginRight: '5px' }}
-                          >
-                            Save Grade
-                          </button>
-                          <button
-                            onClick={() => setGradingSubmissionId(null)}
-                            style={{ padding: '4px 10px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setGradingSubmissionId(sub.id);
-                            setMarksInput(sub.marks || 0);
-                            setFeedbackInput(sub.feedback || '');
-                          }}
-                          style={{ marginTop: '8px', padding: '4px 10px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
-                        >
-                          {sub.status === 'GRADED' ? 'Edit Grade' : 'Grade Submission'}
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
-          )}
-        </div>
-      ) : (
-        <p style={{ fontSize: '13px', color: '#777', marginTop: '10px' }}>No assignments added to this section yet.</p>
-      )}
+
+            {/* Submissions List & Grading UI */}
+            {selectedAssignmentId === assignment.id && (
+              <div style={{ marginTop: '12px', background: '#f1f5f9', padding: '10px', borderRadius: '4px', borderTop: '2px solid #3498db' }}>
+                <h6 style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#1e293b' }}>Student Submissions:</h6>
+                {loadingSubmissions ? (
+                  <p style={{ fontSize: '12px', color: '#64748b' }}>Loading submissions...</p>
+                ) : submissions.length > 0 ? (
+                  submissions.map((sub) => (
+                    <div key={sub.id} style={{ background: '#fff', padding: '10px', borderRadius: '4px', marginBottom: '8px', border: '1px solid #cbd5e1' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#334155' }}>
+                          👤 {sub.User?.name || `Student ID: ${sub.user_id}`} ({sub.User?.email})
+                        </span>
+                        <span style={{ fontSize: '11px', background: sub.status === 'GRADED' ? '#dcfce7' : '#fef3c7', color: sub.status === 'GRADED' ? '#166534' : '#92400e', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold' }}>
+                          {sub.status}
+                        </span>
+                      </div>
+
+                      {sub.submission_url && (
+                        <div style={{ fontSize: '12px', marginBottom: '4px' }}>
+                          🔗 Link/URL: <a href={sub.submission_url} target="_blank" rel="noreferrer" style={{ color: '#2563eb' }}>{sub.submission_url}</a>
+                        </div>
+                      )}
+                      {sub.content && (
+                        <div style={{ fontSize: '12px', background: '#f8fafc', padding: '6px', borderRadius: '4px', marginBottom: '8px', color: '#475569' }}>
+                          💬 Submission Text: {sub.content}
+                        </div>
+                      )}
+
+                      {/* Grading Input Box */}
+                      <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input
+                          type="number"
+                          placeholder="Marks"
+                          defaultValue={sub.marks ?? ''}
+                          onChange={(e) => setGradingMarks({ ...gradingMarks, [sub.id]: Number(e.target.value) })}
+                          style={{ width: '70px', padding: '4px', fontSize: '12px' }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Feedback (e.g. Good job!)"
+                          defaultValue={sub.feedback ?? ''}
+                          onChange={(e) => setGradingFeedback({ ...gradingFeedback, [sub.id]: e.target.value })}
+                          style={{ flex: 1, padding: '4px', fontSize: '12px' }}
+                        />
+                        <button
+                          onClick={() => handleGradeSubmission(sub.id)}
+                          style={{ padding: '4px 10px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
+                        >
+                          Save Grade
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0 }}>No submissions received for this assignment yet.</p>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
