@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import API from './api';
 
 interface Assignment {
@@ -33,7 +34,7 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
   const [userRole, setUserRole] = useState<string>('STUDENT');
 
   useEffect(() => {
-    // Logged-in User Role එක Check කරගැනීම
+    // Check logged-in user role
     API.get('/profile')
       .then((res) => {
         if (res.data?.user?.role) {
@@ -51,7 +52,7 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
       const assignList: Assignment[] = res.data.assignments || [];
       setAssignments(assignList);
 
-      // Student කෙනෙක් නම් විතරක් කලින් කරපු Submissions Check කරනවා
+      // Fetch user submissions if student
       assignList.forEach(async (a) => {
         try {
           const subRes = await API.get(`/assignments/${a.id}/my-submission`);
@@ -87,106 +88,262 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
   if (assignments.length === 0) return null;
 
   return (
-    <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#f0f4f8', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-      <h3 style={{ margin: '0 0 15px 0', color: '#1e293b' }}>📝 Section Assignments</h3>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        marginTop: 24,
+        padding: 24,
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 10,
+          marginBottom: 20,
+          paddingBottom: 12,
+          borderBottom: '1px solid #f1f5f9',
+        }}
+      >
+        <span style={{ fontSize: 20 }}>📝</span>
+        <div>
+          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#0f172a' }}>
+            Section Assignments
+          </h3>
+          <p style={{ margin: '2px 0 0 0', fontSize: 13, color: '#64748b' }}>
+            Complete the assignments below to demonstrate your knowledge.
+          </p>
+        </div>
+      </div>
 
-      {assignments.map((a) => {
-        const submission = submissions[a.id];
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        {assignments.map((a) => {
+          const submission = submissions[a.id];
 
-        return (
-          <div key={a.id} style={{ backgroundColor: '#fff', padding: '15px', borderRadius: '6px', marginBottom: '15px', border: '1px solid #e2e8f0' }}>
-            <h4 style={{ margin: '0 0 5px 0', color: '#2c3e50' }}>{a.title}</h4>
-            <p style={{ fontSize: '14px', color: '#555', margin: '0 0 10px 0' }}>{a.description}</p>
-            <div style={{ fontSize: '12px', color: '#7f8c8d', marginBottom: '10px' }}>
-              <strong>Max Marks:</strong> {a.max_marks}
-            </div>
-
-            {/* Instructor / Admin ට Submit Form එක පෙන්වන්නේ නැත (Notice පමණි) */}
-            {userRole === 'ADMIN' || userRole === 'INSTRUCTOR' ? (
-              <div style={{ padding: '8px 12px', background: '#e0f2fe', color: '#0369a1', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
-                ℹ️ Instructor/Admin View: Submissions and Grading options are available in Course Builder.
-              </div>
-            ) : submission ? (
-              /* Student: Submission Status & Grade View */
-              <div style={{ padding: '12px', background: submission.status === 'GRADED' ? '#e8f8f5' : '#fef9e7', border: '1px solid #ddd', borderRadius: '6px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <strong style={{ fontSize: '14px', color: submission.status === 'GRADED' ? '#27ae60' : '#d35400' }}>
-                    Status: {submission.status === 'GRADED' ? '✓ Graded' : '⏳ Submitted (Pending Review)'}
-                  </strong>
-                  <span style={{ fontSize: '12px', color: '#888' }}>
-                    Submitted on: {new Date(submission.created_at).toLocaleDateString()}
-                  </span>
+          return (
+            <div
+              key={a.id}
+              style={{
+                backgroundColor: '#f8fafc',
+                padding: 20,
+                borderRadius: 12,
+                border: '1px solid #e2e8f0',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                <div>
+                  <h4 style={{ margin: '0 0 6px 0', fontSize: 16, fontWeight: 700, color: '#1e293b' }}>
+                    {a.title}
+                  </h4>
+                  <p style={{ fontSize: 13.5, color: '#475569', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                    {a.description}
+                  </p>
                 </div>
-
-                {submission.status === 'GRADED' && (
-                  <div style={{ marginTop: '10px', padding: '10px', background: '#fff', borderRadius: '4px', border: '1px solid #2ecc71' }}>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#27ae60' }}>
-                      🎯 Your Grade: {submission.marks} / {a.max_marks}
-                    </div>
-                    {submission.feedback && (
-                      <p style={{ margin: '5px 0 0 0', fontSize: '13px', color: '#2c3e50' }}>
-                        💬 <strong>Instructor Feedback:</strong> {submission.feedback}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                <div style={{ marginTop: '10px', fontSize: '13px', color: '#555' }}>
-                  {submission.content && <div><strong>Your Answer:</strong> {submission.content}</div>}
-                  {submission.submission_url && (
-                    <div>
-                      <strong>Your Link:</strong>{' '}
-                      <a href={submission.submission_url} target="_blank" rel="noreferrer">
-                        {submission.submission_url}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              /* Student: Submission Form */
-              <div style={{ marginTop: '10px', padding: '10px', background: '#fafafa', borderRadius: '4px', border: '1px solid #eee' }}>
-                <div style={{ marginBottom: '8px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>Text Answer / Notes:</label>
-                  <textarea
-                    rows={2}
-                    value={submissionContent[a.id] || ''}
-                    onChange={(e) => setSubmissionContent({ ...submissionContent, [a.id]: e.target.value })}
-                    placeholder="Type your submission content here..."
-                    style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <div style={{ marginBottom: '10px' }}>
-                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 'bold', marginBottom: '4px' }}>Submission Link (GitHub / Google Drive / PDF):</label>
-                  <input
-                    type="url"
-                    value={submissionUrl[a.id] || ''}
-                    onChange={(e) => setSubmissionUrl({ ...submissionUrl, [a.id]: e.target.value })}
-                    placeholder="https://..."
-                    style={{ width: '100%', padding: '6px', boxSizing: 'border-box' }}
-                  />
-                </div>
-                <button
-                  onClick={() => handleSubmit(a.id)}
-                  disabled={submitting === a.id}
+                <span
                   style={{
-                    padding: '6px 12px',
-                    backgroundColor: '#3498db',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
+                    backgroundColor: '#e0e7ff',
+                    color: '#3730a3',
+                    fontSize: 12,
+                    fontWeight: 700,
+                    padding: '4px 10px',
+                    borderRadius: 20,
+                    whiteSpace: 'nowrap',
                   }}
                 >
-                  {submitting === a.id ? 'Submitting...' : 'Submit Assignment'}
-                </button>
+                  Max Marks: {a.max_marks}
+                </span>
               </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+
+              {/* Instructor / Admin View */}
+              {userRole === 'ADMIN' || userRole === 'INSTRUCTOR' ? (
+                <div
+                  style={{
+                    padding: '12px 16px',
+                    background: '#e0f2fe',
+                    color: '#0369a1',
+                    borderRadius: 8,
+                    fontSize: 13,
+                    fontWeight: 500,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span>ℹ️</span> Instructor/Admin View: Submissions and Grading options are available in Course Builder.
+                </div>
+              ) : submission ? (
+                /* Student: Submission Status & Grade View */
+                <div
+                  style={{
+                    padding: 16,
+                    background: submission.status === 'GRADED' ? '#f0fdf4' : '#fffbeb',
+                    border: `1px solid ${submission.status === 'GRADED' ? '#bbf7d0' : '#fef08a'}`,
+                    borderRadius: 10,
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                    <span
+                      style={{
+                        fontSize: 13.5,
+                        fontWeight: 700,
+                        color: submission.status === 'GRADED' ? '#15803d' : '#b45309',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 6,
+                      }}
+                    >
+                      {submission.status === 'GRADED' ? '✓ Graded' : '⏳ Submitted (Pending Review)'}
+                    </span>
+                    <span style={{ fontSize: 12, color: '#64748b' }}>
+                      Submitted on: {new Date(submission.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  {submission.status === 'GRADED' && (
+                    <div
+                      style={{
+                        marginTop: 12,
+                        padding: 12,
+                        background: '#ffffff',
+                        borderRadius: 8,
+                        border: '1px solid #86efac',
+                      }}
+                    >
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#15803d' }}>
+                        🎯 Your Grade: {submission.marks} / {a.max_marks}
+                      </div>
+                      {submission.feedback && (
+                        <p style={{ margin: '6px 0 0 0', fontSize: 13, color: '#334155' }}>
+                          💬 <strong>Instructor Feedback:</strong> {submission.feedback}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: 12, fontSize: 13, color: '#334155', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {submission.content && (
+                      <div>
+                        <strong>Your Answer:</strong> {submission.content}
+                      </div>
+                    )}
+                    {submission.submission_url && (
+                      <div>
+                        <strong>Your Link:</strong>{' '}
+                        <a
+                          href={submission.submission_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ color: '#4f46e5', textDecoration: 'underline', fontWeight: 500 }}
+                        >
+                          {submission.submission_url}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                /* Student: Submission Form */
+                <div
+                  style={{
+                    marginTop: 12,
+                    padding: 16,
+                    background: '#ffffff',
+                    borderRadius: 10,
+                    border: '1px solid #e2e8f0',
+                  }}
+                >
+                  <div style={{ marginBottom: 14 }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: 12.5,
+                        fontWeight: 600,
+                        color: '#334155',
+                        marginBottom: 6,
+                      }}
+                    >
+                      Text Answer / Notes:
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={submissionContent[a.id] || ''}
+                      onChange={(e) => setSubmissionContent({ ...submissionContent, [a.id]: e.target.value })}
+                      placeholder="Type your submission content here..."
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        boxSizing: 'border-box',
+                        borderRadius: 8,
+                        border: '1px solid #cbd5e1',
+                        fontSize: 13.5,
+                        outline: 'none',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: 16 }}>
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: 12.5,
+                        fontWeight: 600,
+                        color: '#334155',
+                        marginBottom: 6,
+                      }}
+                    >
+                      Submission Link (GitHub / Google Drive / PDF):
+                    </label>
+                    <input
+                      type="url"
+                      value={submissionUrl[a.id] || ''}
+                      onChange={(e) => setSubmissionUrl({ ...submissionUrl, [a.id]: e.target.value })}
+                      placeholder="https://..."
+                      style={{
+                        width: '100%',
+                        padding: '9px 12px',
+                        boxSizing: 'border-box',
+                        borderRadius: 8,
+                        border: '1px solid #cbd5e1',
+                        fontSize: 13.5,
+                        outline: 'none',
+                        fontFamily: 'inherit',
+                      }}
+                    />
+                  </div>
+
+                  <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    onClick={() => handleSubmit(a.id)}
+                    disabled={submitting === a.id}
+                    style={{
+                      padding: '9px 18px',
+                      backgroundColor: submitting === a.id ? '#cbd5e1' : '#4f46e5',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: 8,
+                      cursor: submitting === a.id ? 'not-allowed' : 'pointer',
+                      fontWeight: 600,
+                      fontSize: 13.5,
+                      boxShadow: submitting === a.id ? 'none' : '0 2px 6px rgba(79, 70, 229, 0.2)',
+                    }}
+                  >
+                    {submitting === a.id ? 'Submitting...' : 'Submit Assignment'}
+                  </motion.button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </motion.div>
   );
 };
 

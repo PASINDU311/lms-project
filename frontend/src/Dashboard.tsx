@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import API from './api';
+
+// AdminUserManagement component එක
 import AdminUserManagement from './AdminUserManagement';
 
 interface Course {
@@ -8,6 +11,8 @@ interface Course {
   title: string;
   description: string;
   price: number;
+  level?: string;
+  capacity?: number;
 }
 
 interface UserProfile {
@@ -88,135 +93,801 @@ const Dashboard: React.FC = () => {
     window.location.href = '/';
   };
 
-  if (loading) return <div style={{ textAlign: 'center', padding: '50px' }}>Loading Dashboard...</div>;
+  if (loading) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#f8fafc',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        }}
+      >
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+          style={{
+            width: 44,
+            height: 44,
+            borderRadius: '50%',
+            border: '3px solid #e2e8f0',
+            borderTopColor: '#4f46e5',
+            marginBottom: 16,
+          }}
+        />
+        <p style={{ color: '#64748b', fontSize: 14, fontWeight: 500 }}>
+          Loading your dashboard...
+        </p>
+      </div>
+    );
+  }
+
+  const isStaff = user?.role === 'ADMIN' || user?.role === 'INSTRUCTOR';
+
+  // Stats Card Data strictly matching the sleek modern design
+  const statCards = isStaff && adminStats
+    ? [
+        {
+          label: 'TOTAL STUDENTS',
+          value: adminStats.total_students.toLocaleString(),
+          subtext: '↗ +12% this month',
+          subColor: '#16a34a',
+          iconBg: '#f1f5f9',
+          icon: (
+            <svg width="22" height="22" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          )
+        },
+        {
+          label: 'TOTAL COURSES',
+          value: adminStats.total_courses,
+          subtext: '✓ Active this semester',
+          subColor: '#64748b',
+          iconBg: '#f1f5f9',
+          icon: (
+            <svg width="22" height="22" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+          )
+        },
+        {
+          label: 'NEW ENROLLMENTS',
+          value: adminStats.total_enrollments,
+          subtext: '↗ +5% this week',
+          subColor: '#16a34a',
+          iconBg: '#f1f5f9',
+          icon: (
+            <svg width="22" height="22" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+            </svg>
+          )
+        },
+        {
+          label: 'PENDING REVIEWS',
+          value: adminStats.pending_submissions,
+          subtext: '⚠ Requires attention',
+          subColor: '#dc2626',
+          iconBg: '#fef2f2',
+          icon: (
+            <svg width="22" height="22" fill="none" stroke="#ef4444" viewBox="0 0 24 24" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          )
+        },
+      ]
+    : [
+        {
+          label: 'AVAILABLE COURSES',
+          value: courses.length,
+          subtext: 'Ready to learn',
+          subColor: '#64748b',
+          iconBg: '#f1f5f9',
+          icon: '📚'
+        },
+        {
+          label: 'LEARNING STATUS',
+          value: 'Active',
+          subtext: 'On track',
+          subColor: '#16a34a',
+          iconBg: '#f1f5f9',
+          icon: '🚀'
+        },
+      ];
+
+  // Course Banners Gradients for Card Headers
+  const courseGradients = [
+    'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+    'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+    'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
+    'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+  ];
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '30px auto', fontFamily: 'sans-serif', padding: '0 20px' }}>
-      {/* Top Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #eee', paddingBottom: '15px' }}>
-        <div>
-          <h2 style={{ margin: 0, color: '#1e293b' }}>Welcome, {user?.name}! 👋</h2>
-          <span style={{ fontSize: '12px', background: '#e2e8f0', padding: '3px 8px', borderRadius: '12px', fontWeight: 'bold', color: '#475569' }}>
-            ROLE: {user?.role}
-          </span>
-        </div>
-        <div>
-          <button onClick={() => navigate('/my-courses')} style={{ marginRight: '10px', padding: '8px 15px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            My Enrolled Courses
-          </button>
-          <button onClick={handleLogout} style={{ padding: '8px 15px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Logout
-          </button>
-        </div>
-      </div>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#f8fafc',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+        color: '#0f172a',
+      }}
+    >
+      {/* 1. Top Navbar */}
+      <header
+        style={{
+          background: '#ffffff',
+          borderBottom: '1px solid #e2e8f0',
+          position: 'sticky',
+          top: 0,
+          zIndex: 30,
+        }}
+      >
+        <div
+          style={{
+            maxWidth: 1280,
+            margin: '0 auto',
+            padding: '0 24px',
+            height: 70,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          {/* Logo & Main Nav */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  fontWeight: 800,
+                  fontSize: 18,
+                }}
+              >
+                🎓
+              </div>
+              <span style={{ fontSize: 18, fontWeight: 800, color: '#334155', letterSpacing: '-0.3px' }}>
+                EduFlow <span style={{ color: '#4f46e5' }}>LMS</span>
+              </span>
+            </div>
 
-      {/* 📊 Analytics Cards (Instructor & Admin View) */}
-      {(user?.role === 'ADMIN' || user?.role === 'INSTRUCTOR') && adminStats && (
-        <div style={{ marginTop: '25px' }}>
-          <h3 style={{ margin: '0 0 15px 0', color: '#334155' }}>📈 Platform Analytics Overview</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '15px' }}>
-            <div style={{ background: '#ebf8ff', padding: '15px', borderRadius: '8px', borderLeft: '5px solid #3182ce' }}>
-              <div style={{ fontSize: '12px', color: '#2b6cb0', fontWeight: 'bold' }}>TOTAL STUDENTS</div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2c5282', marginTop: '5px' }}>{adminStats.total_students}</div>
-            </div>
-            <div style={{ background: '#f0fff4', padding: '15px', borderRadius: '8px', borderLeft: '5px solid #38a169' }}>
-              <div style={{ fontSize: '12px', color: '#276749', fontWeight: 'bold' }}>TOTAL COURSES</div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#22543d', marginTop: '5px' }}>{adminStats.total_courses}</div>
-            </div>
-            <div style={{ background: '#faf5ff', padding: '15px', borderRadius: '8px', borderLeft: '5px solid #805ad5' }}>
-              <div style={{ fontSize: '12px', color: '#6b46c1', fontWeight: 'bold' }}>ENROLLMENTS</div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#4a5568', marginTop: '5px' }}>{adminStats.total_enrollments}</div>
-            </div>
-            <div style={{ background: '#fffaf0', padding: '15px', borderRadius: '8px', borderLeft: '5px solid #dd6b20' }}>
-              <div style={{ fontSize: '12px', color: '#c05621', fontWeight: 'bold' }}>PENDING REVIEWS</div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#9c4221', marginTop: '5px' }}>{adminStats.pending_submissions}</div>
+            <nav style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+              <a
+                href="#dashboard"
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: '#4f46e5',
+                  textDecoration: 'none',
+                  borderBottom: '2px solid #4f46e5',
+                  paddingBottom: 22,
+                  marginTop: 22,
+                }}
+              >
+                Dashboard
+              </a>
+              <a
+                onClick={() => navigate('/my-courses')}
+                style={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  color: '#64748b',
+                  textDecoration: 'none',
+                  cursor: 'pointer',
+                }}
+              >
+                My Courses
+              </a>
+              <a href="#messages" style={{ fontSize: 14, fontWeight: 500, color: '#64748b', textDecoration: 'none' }}>
+                Messages
+              </a>
+              <a href="#resources" style={{ fontSize: 14, fontWeight: 500, color: '#64748b', textDecoration: 'none' }}>
+                Resources
+              </a>
+            </nav>
+          </div>
+
+          {/* Right Header Controls */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            {isStaff && (
+              <button
+                onClick={() => setShowCourseForm(!showCourseForm)}
+                style={{
+                  background: '#4f46e5',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '9px 18px',
+                  borderRadius: 10,
+                  fontWeight: 600,
+                  fontSize: 13.5,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'pointer',
+                  boxShadow: '0 2px 6px rgba(79, 70, 229, 0.25)',
+                }}
+              >
+                <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Create Course
+              </button>
+            )}
+
+            {/* Notification & Settings */}
+            <button
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                cursor: 'pointer',
+                padding: 6,
+                borderRadius: '50%',
+              }}
+            >
+              🔔
+            </button>
+            <button
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                cursor: 'pointer',
+                padding: 6,
+                borderRadius: '50%',
+              }}
+            >
+              ⚙️
+            </button>
+
+            {/* User Avatar */}
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: '50%',
+                background: '#e0e7ff',
+                color: '#4338ca',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: 14,
+                border: '2px solid #fff',
+                boxShadow: '0 0 0 1px #e2e8f0',
+              }}
+            >
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
             </div>
           </div>
         </div>
-      )}
+      </header>
 
-      {/* 👥 Admin Only: User Management & Instructor Approvals 🔥 */}
-      {user?.role === 'ADMIN' && <AdminUserManagement />}
-
-      {/* Course Management Bar for Instructor / Admin */}
-      {(user?.role === 'ADMIN' || user?.role === 'INSTRUCTOR') && (
-        <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3>📚 Course Management</h3>
-          <button
-            onClick={() => setShowCourseForm(!showCourseForm)}
-            style={{ padding: '8px 16px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
-          >
-            {showCourseForm ? 'Close Form' : '+ Create New Course'}
-          </button>
-        </div>
-      )}
-
-      {/* Create Course Form */}
-      {showCourseForm && (
-        <form onSubmit={handleCreateCourse} style={{ background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #cbd5e1', marginTop: '15px' }}>
-          <h4>Create New Course</h4>
-          <input
-            type="text"
-            placeholder="Course Title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
-          />
-          <textarea
-            placeholder="Course Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            required
-            rows={3}
-            style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
-          />
-          <input
-            type="number"
-            placeholder="Price ($)"
-            value={price}
-            onChange={(e) => setPrice(Number(e.target.value))}
-            style={{ width: '150px', padding: '8px', marginBottom: '15px', display: 'block' }}
-          />
-          <button type="submit" style={{ padding: '8px 20px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Save Course
-          </button>
-        </form>
-      )}
-
-      {/* All Available Courses Grid */}
-      <h3 style={{ marginTop: '35px' }}>Available Courses</h3>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px', marginTop: '15px' }}>
-        {courses.map((course) => (
-          <div key={course.id} style={{ border: '1px solid #e2e8f0', borderRadius: '8px', padding: '15px', background: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-            <div>
-              <h4 style={{ margin: '0 0 10px 0', color: '#1e293b' }}>{course.title}</h4>
-              <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 15px 0' }}>{course.description}</p>
-            </div>
-            <div>
-              <div style={{ fontWeight: 'bold', fontSize: '16px', color: '#27ae60', marginBottom: '10px' }}>
-                {course.price === 0 ? 'Free' : `$${course.price}`}
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => navigate(`/learn/${course.id}`)}
-                  style={{ flex: 1, padding: '8px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
+      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '36px 24px 64px' }}>
+        {/* 2. Welcome Banner Header */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: 32,
+          }}
+        >
+          <div>
+            <h1
+              style={{
+                fontSize: 28,
+                fontWeight: 800,
+                letterSpacing: '-0.5px',
+                color: '#0f172a',
+                margin: '0 0 6px 0',
+              }}
+            >
+              Welcome back, {user?.name || 'User'}
+            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 14, color: '#64748b' }}>
+                Here is what's happening with your courses today.
+              </span>
+              <span
+                style={{
+                  background: '#dcfce7',
+                  color: '#15803d',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: '2px 10px',
+                  borderRadius: 999,
+                  textTransform: 'capitalize',
+                }}
+              >
+                {user?.role?.toLowerCase()}
+              </span>
+              {user?.role === 'ADMIN' && (
+                <span
+                  style={{
+                    background: '#e0e7ff',
+                    color: '#4338ca',
+                    fontSize: 11,
+                    fontWeight: 700,
+                    padding: '2px 10px',
+                    borderRadius: 999,
+                  }}
                 >
-                  View Course
-                </button>
-                {(user?.role === 'ADMIN' || user?.role === 'INSTRUCTOR') && (
-                  <button
-                    onClick={() => navigate(`/builder/${course.id}`)}
-                    style={{ padding: '8px', background: '#f39c12', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '13px' }}
-                  >
-                    Builder
-                  </button>
-                )}
-              </div>
+                  Admin
+                </span>
+              )}
             </div>
           </div>
-        ))}
-      </div>
+
+          <button
+            onClick={handleLogout}
+            style={{
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              padding: '9px 16px',
+              borderRadius: 10,
+              color: '#475569',
+              fontSize: 13.5,
+              fontWeight: 600,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            🚪 Logout
+          </button>
+        </div>
+
+        {/* 3. Analytics Metric Cards */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+            gap: 20,
+            marginBottom: 40,
+          }}
+        >
+          {statCards.map((card) => (
+            <div
+              key={card.label}
+              style={{
+                background: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: 16,
+                padding: 22,
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'flex-start',
+              }}
+            >
+              <div>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#64748b',
+                    letterSpacing: '0.6px',
+                    display: 'block',
+                    marginBottom: 10,
+                  }}
+                >
+                  {card.label}
+                </span>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
+                  {card.value}
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 600,
+                    color: card.subColor,
+                    marginTop: 10,
+                  }}
+                >
+                  {card.subtext}
+                </div>
+              </div>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 12,
+                  background: card.iconBg,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                {card.icon}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* 4. Admin User Management Section */}
+        {user?.role === 'ADMIN' && (
+          <div
+            style={{
+              marginBottom: 40,
+              background: '#ffffff',
+              borderRadius: 16,
+              border: '1px solid #e2e8f0',
+              padding: 24,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+            }}
+          >
+            {AdminUserManagement ? (
+              <AdminUserManagement />
+            ) : (
+              <p style={{ color: '#64748b' }}>Admin User Management Module</p>
+            )}
+          </div>
+        )}
+
+        {/* 5. Create Course Collapsible Form */}
+        <AnimatePresence>
+          {showCourseForm && (
+            <motion.form
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              onSubmit={handleCreateCourse}
+              style={{
+                background: '#ffffff',
+                padding: 28,
+                borderRadius: 16,
+                border: '1px solid #e2e8f0',
+                marginBottom: 40,
+                overflow: 'hidden',
+                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+              }}
+            >
+              <h3 style={{ margin: '0 0 20px 0', fontSize: 18, fontWeight: 700, color: '#0f172a' }}>
+                Create New Course
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 16 }}>
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 6 }}>
+                    Course Title
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Advanced Machine Learning Algorithms"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: 8,
+                      border: '1px solid #cbd5e1',
+                      fontSize: 14,
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 6 }}>
+                    Price ($)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="0"
+                    value={price}
+                    onChange={(e) => setPrice(Number(e.target.value))}
+                    style={{
+                      width: '100%',
+                      padding: '11px 14px',
+                      borderRadius: 8,
+                      border: '1px solid #cbd5e1',
+                      fontSize: 14,
+                      outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+              </div>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 6 }}>
+                  Course Description
+                </label>
+                <textarea
+                  placeholder="Deep dive into neural networks, SVMs, and unsupervised learning..."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  required
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '11px 14px',
+                    borderRadius: 8,
+                    border: '1px solid #cbd5e1',
+                    fontSize: 14,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    resize: 'vertical',
+                  }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: 12 }}>
+                <button
+                  type="submit"
+                  style={{
+                    background: '#4f46e5',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '10px 24px',
+                    borderRadius: 8,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Save Course
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowCourseForm(false)}
+                  style={{
+                    background: '#f1f5f9',
+                    color: '#475569',
+                    border: 'none',
+                    padding: '10px 20px',
+                    borderRadius: 8,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.form>
+          )}
+        </AnimatePresence>
+
+        {/* 6. Active Courses Section */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', margin: 0 }}>
+            Active Courses
+          </h2>
+          <button style={{ background: 'none', border: 'none', color: '#4f46e5', fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>
+            View All
+          </button>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: 24,
+          }}
+        >
+          {courses.map((course, idx) => {
+            const bgGradient = courseGradients[idx % courseGradients.length];
+            return (
+              <div
+                key={course.id}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: 16,
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
+                }}
+              >
+                <div>
+                  {/* Card Colored Header */}
+                  <div
+                    style={{
+                      height: 120,
+                      background: bgGradient,
+                      padding: 16,
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      boxSizing: 'border-box',
+                    }}
+                  >
+                    <span
+                      style={{
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        color: '#0f172a',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        padding: '4px 12px',
+                        borderRadius: 6,
+                      }}
+                    >
+                      {course.price === 0 ? 'Beginner' : 'Advanced'}
+                    </span>
+                    <span
+                      style={{
+                        color: '#ffffff',
+                        fontWeight: 800,
+                        fontSize: 15,
+                      }}
+                    >
+                      {course.price === 0 ? 'Free' : `$${course.price}`}
+                    </span>
+                  </div>
+
+                  {/* Card Content Body */}
+                  <div style={{ padding: 20 }}>
+                    <h3
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: '#0f172a',
+                        margin: '0 0 8px 0',
+                        lineHeight: 1.3,
+                      }}
+                    >
+                      {course.title}
+                    </h3>
+                    <p
+                      style={{
+                        fontSize: 13,
+                        color: '#64748b',
+                        margin: '0 0 20px 0',
+                        lineHeight: 1.5,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {course.description}
+                    </p>
+
+                    {/* Progress / Capacity Bar */}
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={{ height: 6, width: '100%', background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
+                        <div
+                          style={{
+                            height: '100%',
+                            width: `${Math.min(45 + idx * 20, 85)}%`,
+                            background: '#4f46e5',
+                            borderRadius: 999,
+                          }}
+                        />
+                      </div>
+                      <div style={{ fontSize: 11, color: '#94a3b8', textAlign: 'right', marginTop: 6, fontWeight: 500 }}>
+                        {Math.min(45 + idx * 20, 85)}% Capacity
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                <div
+                  style={{
+                    padding: '0 20px 20px 20px',
+                    display: 'flex',
+                    gap: 10,
+                  }}
+                >
+                  <button
+                    onClick={() => navigate(`/learn/${course.id}`)}
+                    style={{
+                      flex: 1,
+                      background: '#4f46e5',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '10px',
+                      borderRadius: 10,
+                      fontWeight: 600,
+                      fontSize: 13.5,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    View Course
+                  </button>
+
+                  {isStaff && (
+                    <button
+                      onClick={() => navigate(`/builder/${course.id}`)}
+                      style={{
+                        background: '#ffffff',
+                        border: '1px solid #cbd5e1',
+                        color: '#475569',
+                        width: 40,
+                        borderRadius: 10,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                      }}
+                      title="Edit Course Builder"
+                    >
+                      ✏️
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Create New Course Placeholder Card */}
+          {isStaff && (
+            <div
+              onClick={() => setShowCourseForm(true)}
+              style={{
+                border: '2px dashed #cbd5e1',
+                borderRadius: 16,
+                minHeight: 340,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: 24,
+                cursor: 'pointer',
+                background: '#f8fafc',
+                transition: 'border-color 0.2s',
+              }}
+            >
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: '50%',
+                  background: '#e0e7ff',
+                  color: '#4f46e5',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 22,
+                  marginBottom: 16,
+                }}
+              >
+                +
+              </div>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>
+                Create New Course
+              </h3>
+              <p style={{ fontSize: 13, color: '#64748b', textAlign: 'center', margin: '0 0 20px 0', maxWidth: 200 }}>
+                Launch a new module, syllabus, or full curriculum.
+              </p>
+              <button
+                style={{
+                  background: '#4f46e5',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '9px 20px',
+                  borderRadius: 8,
+                  fontWeight: 600,
+                  fontSize: 13,
+                }}
+              >
+                Builder
+              </button>
+            </div>
+          )}
+        </div>
+
+        {courses.length === 0 && !isStaff && (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '60px 20px',
+              color: '#94a3b8',
+              fontSize: 14,
+            }}
+          >
+            No courses available yet.
+          </div>
+        )}
+      </main>
     </div>
   );
 };

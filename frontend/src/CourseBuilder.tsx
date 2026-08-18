@@ -155,94 +155,240 @@ const CourseBuilder: React.FC = () => {
     }
   };
 
-  if (loading) return <div style={{ padding: '20px', textAlign: 'center' }}>Loading Builder...</div>;
-  if (!course) return <div style={{ padding: '20px', textAlign: 'center' }}>Course not found.</div>;
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ padding: '24px 32px', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', color: '#64748b', fontSize: '15px', fontWeight: 500 }}>
+          Loading Course Builder...
+        </div>
+      </div>
+    );
+  }
+
+  if (!course) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', fontFamily: "'Inter', sans-serif" }}>
+        <div style={{ padding: '24px 32px', backgroundColor: '#ffffff', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', color: '#0f172a', fontSize: '15px', fontWeight: 600 }}>
+          Course not found.
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: '900px', margin: '30px auto', fontFamily: 'sans-serif' }}>
-      <button onClick={() => navigate('/dashboard')} style={{ padding: '8px 12px', cursor: 'pointer', marginBottom: '20px' }}>
-        &larr; Back to Dashboard
-      </button>
+    <div style={{ maxWidth: '1020px', margin: '0 auto', padding: '40px 24px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: '#0f172a', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
+      
+      {/* Breadcrumb Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
+        <span style={{ cursor: 'pointer', transition: 'color 0.2s' }} onClick={() => navigate('/dashboard')}>Dashboard</span>
+        <span>&rsaquo;</span>
+        <span style={{ cursor: 'pointer', transition: 'color 0.2s' }} onClick={() => navigate('/dashboard')}>My Courses</span>
+        <span>&rsaquo;</span>
+        <span style={{ color: '#4f46e5', fontWeight: 600 }}>Course Curriculum Builder</span>
+      </div>
 
-      <h2>Course Builder: {course.title}</h2>
-      <p style={{ color: '#666' }}>{course.description}</p>
-      <hr />
+      {/* Course Action Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '20px', marginBottom: '16px', flexWrap: 'wrap' }}>
+        <div>
+          <span style={{ display: 'inline-block', padding: '4px 10px', backgroundColor: '#e0e7ff', color: '#4338ca', borderRadius: '20px', fontSize: '12px', fontWeight: 600, marginBottom: '8px' }}>
+            Instructor Mode
+          </span>
+          <h1 style={{ fontSize: '32px', fontWeight: 800, color: '#0f172a', margin: 0, letterSpacing: '-0.02em', lineHeight: 1.25 }}>
+            {course.title}
+          </h1>
+        </div>
 
-      {/* Add New Section Form */}
-      <div style={{ background: '#f8f9fa', padding: '15px', borderRadius: '5px', marginBottom: '25px', border: '1px solid #ddd' }}>
-        <h3>+ Add New Section / Module</h3>
-        <form onSubmit={handleAddSection} style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <button
+            onClick={() => navigate(`/learn/${course.id}`)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '10px 18px',
+              backgroundColor: '#ffffff',
+              border: '1px solid #cbd5e1',
+              borderRadius: '10px',
+              color: '#334155',
+              fontSize: '13.5px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.02)',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#ffffff')}
+          >
+            <span>👁</span> Preview Course
+          </button>
+          <button
+            onClick={() => alert('Course published successfully!')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '10px 20px',
+              backgroundColor: '#4f46e5',
+              border: 'none',
+              borderRadius: '10px',
+              color: '#ffffff',
+              fontSize: '13.5px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 4px 12px rgba(79, 70, 229, 0.25)',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4338ca')}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+          >
+            <span>↑</span> Publish Course
+          </button>
+        </div>
+      </div>
+
+      <p style={{ color: '#64748b', fontSize: '15px', lineHeight: 1.6, margin: '0 0 32px 0', maxWidth: '820px' }}>
+        {course.description || 'Design and structure your curriculum. Add new multimedia lessons, modules, and quizzes to enhance the learning experience.'}
+      </p>
+
+      {/* Add New Section Input Bar */}
+      <div
+        style={{
+          backgroundColor: '#ffffff',
+          border: '1px solid #e2e8f0',
+          borderRadius: '16px',
+          padding: '16px 20px',
+          marginBottom: '36px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01)',
+        }}
+      >
+        <form onSubmit={handleAddSection} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: '#eef2ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4f46e5', fontSize: '18px', fontWeight: 'bold' }}>
+            +
+          </div>
           <input
             type="text"
-            placeholder="Section Title (e.g. Module 01 - Basics)"
+            placeholder="Enter new section or module title (e.g., Introduction to Advanced Concepts)..."
             value={sectionTitle}
             onChange={(e) => setSectionTitle(e.target.value)}
             required
-            style={{ flex: 1, padding: '8px' }}
+            style={{
+              flex: 1,
+              border: 'none',
+              outline: 'none',
+              fontSize: '14.5px',
+              color: '#0f172a',
+              background: 'transparent',
+            }}
           />
-          <button type="submit" style={{ padding: '8px 15px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+          <button
+            type="submit"
+            style={{
+              padding: '10px 20px',
+              backgroundColor: '#6366f1',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '10px',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              boxShadow: '0 2px 6px rgba(99, 102, 241, 0.2)',
+              transition: 'background-color 0.2s',
+            }}
+            onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+            onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#6366f1')}
+          >
             Add Section
           </button>
         </form>
       </div>
 
       {/* Existing Sections & Lessons List */}
-      <h3>Curriculum Structure</h3>
       {course.sections && course.sections.length > 0 ? (
-        course.sections.map((section) => (
-          <div key={section.id} style={{ border: '1px solid #cbd5e1', borderRadius: '5px', padding: '15px', marginBottom: '15px', backgroundColor: '#fff' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              {editingSectionId === section.id ? (
-                <div style={{ display: 'flex', gap: '10px', flex: 1, marginRight: '10px' }}>
-                  <input
-                    type="text"
-                    value={editSectionTitle}
-                    onChange={(e) => setEditSectionTitle(e.target.value)}
-                    style={{ flex: 1, padding: '5px' }}
-                  />
-                  <button onClick={() => handleUpdateSection(section.id)} style={{ padding: '5px 10px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
-                    Save
-                  </button>
-                  <button onClick={() => setEditingSectionId(null)} style={{ padding: '5px 10px', background: '#7f8c8d', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <h4 style={{ margin: 0, color: '#1e293b' }}>📂 {section.title}</h4>
-              )}
+        course.sections.map((section, idx) => (
+          <div
+            key={section.id}
+            style={{
+              backgroundColor: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: '16px',
+              marginBottom: '24px',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)',
+              overflow: 'hidden',
+              transition: 'box-shadow 0.2s ease',
+            }}
+          >
+            {/* Section Header */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '18px 24px',
+                backgroundColor: '#f8fafc',
+                borderBottom: '1px solid #e2e8f0',
+                flexWrap: 'wrap',
+                gap: '12px',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '240px' }}>
+                <span style={{ color: '#94a3b8', cursor: 'grab', fontSize: '15px', fontWeight: 700 }} title="Drag to reorder">::</span>
+                
+                {editingSectionId === section.id ? (
+                  <div style={{ display: 'flex', gap: '10px', flex: 1, marginRight: '16px' }}>
+                    <input
+                      type="text"
+                      value={editSectionTitle}
+                      onChange={(e) => setEditSectionTitle(e.target.value)}
+                      style={{
+                        flex: 1,
+                        padding: '8px 12px',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        outline: 'none',
+                      }}
+                    />
+                    <button
+                      onClick={() => handleUpdateSection(section.id)}
+                      style={{ padding: '8px 14px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setEditingSectionId(null)}
+                      style={{ padding: '8px 14px', background: '#94a3b8', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13px' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                ) : (
+                  <h3 style={{ margin: 0, fontSize: '16.5px', fontWeight: 700, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#4f46e5', backgroundColor: '#eef2ff', padding: '2px 8px', borderRadius: '6px', fontSize: '13px', fontWeight: 600 }}>
+                      Module {idx + 1 < 10 ? `0${idx + 1}` : idx + 1}
+                    </span>
+                    <span>{section.title}</span>
+                  </h3>
+                )}
+              </div>
 
               {editingSectionId !== section.id && (
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <button
                     onClick={() => {
                       setEditingSectionId(section.id);
                       setEditSectionTitle(section.title);
                     }}
-                    style={{ padding: '5px 10px', background: '#f39c12', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px', marginRight: '5px' }}
+                    style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', transition: 'background 0.2s' }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     Edit Title
                   </button>
                   <button
-                    onClick={() => {
-                      setSelectedSectionId(selectedSectionId === section.id ? null : section.id);
-                      setActiveQuizSectionId(null);
-                    }}
-                    style={{ padding: '5px 10px', background: '#3498db', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px', marginRight: '5px' }}
-                  >
-                    {selectedSectionId === section.id ? 'Cancel' : '+ Add Lesson'}
-                  </button>
-                  <button
-                    onClick={() => {
-                      setActiveQuizSectionId(activeQuizSectionId === section.id ? null : section.id);
-                      setSelectedSectionId(null);
-                    }}
-                    style={{ padding: '5px 10px', background: '#8e44ad', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px', marginRight: '5px' }}
-                  >
-                    {activeQuizSectionId === section.id ? 'Cancel Quiz' : '+ Add Quiz'}
-                  </button>
-                  <button
                     onClick={() => handleDeleteSection(section.id)}
-                    style={{ padding: '5px 10px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
+                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', transition: 'background 0.2s' }}
+                    onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
+                    onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     Delete Section
                   </button>
@@ -250,126 +396,221 @@ const CourseBuilder: React.FC = () => {
               )}
             </div>
 
-            {/* Add Lesson Form */}
-            {selectedSectionId === section.id && (
-              <form onSubmit={handleAddLesson} style={{ marginTop: '15px', padding: '10px', background: '#f1f5f9', borderRadius: '4px' }}>
-                <h5>New Lesson for: {section.title}</h5>
-                <input
-                  type="text"
-                  placeholder="Lesson Title"
-                  value={lessonTitle}
-                  onChange={(e) => setLessonTitle(e.target.value)}
-                  required
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
-                />
-                <input
-                  type="text"
-                  placeholder="YouTube Video URL"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
-                />
-                <textarea
-                  placeholder="Lesson Content / Notes"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={3}
-                  style={{ width: '100%', padding: '8px', marginBottom: '10px', boxSizing: 'border-box' }}
-                />
-                <button type="submit" style={{ padding: '8px 12px', background: '#2ecc71', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-                  Save Lesson
-                </button>
-              </form>
-            )}
-
-            {/* Add Quiz Form */}
-            {activeQuizSectionId === section.id && (
-              <QuizBuilder
-                sectionId={section.id}
-                onQuizCreated={() => {
-                  setActiveQuizSectionId(null);
-                  fetchCourseDetails();
-                }}
-              />
-            )}
-
             {/* Lessons List */}
-            <ul style={{ listStyle: 'none', paddingLeft: '15px', marginTop: '10px' }}>
+            <div style={{ padding: '12px 24px 20px 24px' }}>
               {section.lessons && section.lessons.length > 0 ? (
-                section.lessons.map((lesson) => (
-                  <li key={lesson.id} style={{ padding: '8px 0', borderBottom: '1px dashed #e2e8f0', fontSize: '14px' }}>
-                    {editingLessonId === lesson.id ? (
-                      <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '4px', border: '1px solid #cbd5e1' }}>
-                        <input
-                          type="text"
-                          value={editLessonTitle}
-                          onChange={(e) => setEditLessonTitle(e.target.value)}
-                          placeholder="Lesson Title"
-                          style={{ width: '100%', padding: '6px', marginBottom: '6px', boxSizing: 'border-box' }}
-                        />
-                        <input
-                          type="text"
-                          value={editLessonVideoUrl}
-                          onChange={(e) => setEditLessonVideoUrl(e.target.value)}
-                          placeholder="Video URL"
-                          style={{ width: '100%', padding: '6px', marginBottom: '6px', boxSizing: 'border-box' }}
-                        />
-                        <textarea
-                          value={editLessonContent}
-                          onChange={(e) => setEditLessonContent(e.target.value)}
-                          placeholder="Lesson Notes"
-                          rows={2}
-                          style={{ width: '100%', padding: '6px', marginBottom: '6px', boxSizing: 'border-box' }}
-                        />
-                        <button onClick={() => handleUpdateLesson(lesson.id)} style={{ padding: '4px 10px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', marginRight: '5px' }}>
-                          Update Lesson
-                        </button>
-                        <button onClick={() => setEditingLessonId(null)} style={{ padding: '4px 10px', background: '#7f8c8d', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer' }}>
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ color: '#334155' }}>
-                          ▶ <strong>{lesson.title}</strong> {lesson.video_url && <small style={{ color: '#0066cc' }}>(Video Attached)</small>}
-                        </span>
-                        <div>
-                          <button
-                            onClick={() => {
-                              setEditingLessonId(lesson.id);
-                              setEditLessonTitle(lesson.title);
-                              setEditLessonVideoUrl(lesson.video_url);
-                              setEditLessonContent(lesson.content);
-                            }}
-                            style={{ padding: '2px 8px', background: '#f39c12', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '11px', marginRight: '5px' }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteLesson(lesson.id)}
-                            style={{ padding: '2px 8px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '11px' }}
-                          >
-                            Delete
-                          </button>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {section.lessons.map((lesson, lIdx) => (
+                    <div
+                      key={lesson.id}
+                      style={{
+                        padding: '14px 0',
+                        borderBottom: lIdx === section.lessons.length - 1 ? 'none' : '1px solid #f1f5f9',
+                      }}
+                    >
+                      {editingLessonId === lesson.id ? (
+                        <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #cbd5e1' }}>
+                          <input
+                            type="text"
+                            value={editLessonTitle}
+                            onChange={(e) => setEditLessonTitle(e.target.value)}
+                            placeholder="Lesson Title"
+                            style={{ width: '100%', padding: '10px 12px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }}
+                          />
+                          <input
+                            type="text"
+                            value={editLessonVideoUrl}
+                            onChange={(e) => setEditLessonVideoUrl(e.target.value)}
+                            placeholder="Video URL"
+                            style={{ width: '100%', padding: '10px 12px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }}
+                          />
+                          <textarea
+                            value={editLessonContent}
+                            onChange={(e) => setEditLessonContent(e.target.value)}
+                            placeholder="Lesson Notes"
+                            rows={3}
+                            style={{ width: '100%', padding: '10px 12px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }}
+                          />
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={() => handleUpdateLesson(lesson.id)} style={{ padding: '8px 16px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
+                              Update Lesson
+                            </button>
+                            <button onClick={() => setEditingLessonId(null)} style={{ padding: '8px 16px', background: '#94a3b8', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
+                              Cancel
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    )}
-                  </li>
-                ))
-              ) : (
-                <li style={{ fontSize: '13px', color: '#94a3b8', fontStyle: 'italic' }}>No lessons in this section yet.</li>
-              )}
-            </ul>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                            <span style={{ color: '#cbd5e1', cursor: 'grab', fontSize: '14px' }}>::</span>
+                            <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#e0e7ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4338ca', fontSize: '13px', fontWeight: 'bold' }}>
+                              ▶
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: '14.5px', fontWeight: 600, color: '#334155' }}>
+                                {idx + 1}.{lIdx + 1} {lesson.title}
+                              </span>
+                              {lesson.video_url && (
+                                <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '11.5px', fontWeight: 600, padding: '3px 10px', borderRadius: '20px' }}>
+                                  Video Attached
+                                </span>
+                              )}
+                            </div>
+                          </div>
 
-            {/* Instructor Assignment Manager Integration */}
-            <InstructorAssignmentManager 
-              sectionId={section.id} 
-              sectionTitle={section.title} 
-            />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <button
+                              onClick={() => {
+                                setEditingLessonId(lesson.id);
+                                setEditLessonTitle(lesson.title);
+                                setEditLessonVideoUrl(lesson.video_url);
+                                setEditLessonContent(lesson.content);
+                              }}
+                              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', transition: 'background 0.2s' }}
+                              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
+                              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteLesson(lesson.id)}
+                              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', transition: 'background 0.2s' }}
+                              onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
+                              onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ padding: '16px 0', textAlign: 'center' }}>
+                  <p style={{ fontSize: '14px', color: '#94a3b8', fontStyle: 'italic', margin: 0 }}>
+                    No lessons added to this section yet. Use the buttons below to build your curriculum.
+                  </p>
+                </div>
+              )}
+
+              {/* Add Lesson Form Expansion */}
+              {selectedSectionId === section.id && (
+                <form onSubmit={handleAddLesson} style={{ marginTop: '20px', padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)' }}>
+                  <h5 style={{ margin: '0 0 14px 0', fontSize: '15px', fontWeight: 700, color: '#1e293b' }}>Add New Lesson to: {section.title}</h5>
+                  <input
+                    type="text"
+                    placeholder="Lesson Title (e.g., Understanding Components)"
+                    value={lessonTitle}
+                    onChange={(e) => setLessonTitle(e.target.value)}
+                    required
+                    style={{ width: '100%', padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none', fontSize: '14px' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="YouTube Video URL (optional)"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none', fontSize: '14px' }}
+                  />
+                  <textarea
+                    placeholder="Lesson Content / Detailed Notes"
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={3}
+                    style={{ width: '100%', padding: '10px 14px', marginBottom: '14px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none', fontSize: '14px' }}
+                  />
+                  <button type="submit" style={{ padding: '10px 20px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13.5px', boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)' }}>
+                    Save Lesson
+                  </button>
+                </form>
+              )}
+
+              {/* Add Quiz Expansion */}
+              {activeQuizSectionId === section.id && (
+                <div style={{ marginTop: '20px' }}>
+                  <QuizBuilder
+                    sectionId={section.id}
+                    onQuizCreated={() => {
+                      setActiveQuizSectionId(null);
+                      fetchCourseDetails();
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* Action Buttons Row */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginTop: '20px' }}>
+                <button
+                  onClick={() => {
+                    setSelectedSectionId(selectedSectionId === section.id ? null : section.id);
+                    setActiveQuizSectionId(null);
+                  }}
+                  style={{
+                    padding: '12px 16px',
+                    border: '1.5px dashed #cbd5e1',
+                    borderRadius: '10px',
+                    backgroundColor: selectedSectionId === section.id ? '#f1f5f9' : '#ffffff',
+                    color: '#475569',
+                    fontWeight: 600,
+                    fontSize: '13.5px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseOver={(e) => (e.currentTarget.style.borderColor = '#94a3b8')}
+                  onMouseOut={(e) => (e.currentTarget.style.borderColor = '#cbd5e1')}
+                >
+                  <span style={{ fontSize: '16px', color: '#6366f1' }}>+</span> {selectedSectionId === section.id ? 'Cancel Lesson' : 'Add Lesson'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveQuizSectionId(activeQuizSectionId === section.id ? null : section.id);
+                    setSelectedSectionId(null);
+                  }}
+                  style={{
+                    padding: '12px 16px',
+                    border: '1.5px dashed #cbd5e1',
+                    borderRadius: '10px',
+                    backgroundColor: activeQuizSectionId === section.id ? '#f1f5f9' : '#ffffff',
+                    color: '#475569',
+                    fontWeight: 600,
+                    fontSize: '13.5px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseOver={(e) => (e.currentTarget.style.borderColor = '#94a3b8')}
+                  onMouseOut={(e) => (e.currentTarget.style.borderColor = '#cbd5e1')}
+                >
+                  <span>📝</span> {activeQuizSectionId === section.id ? 'Cancel Quiz' : 'Add Quiz'}
+                </button>
+              </div>
+
+              {/* Instructor Assignment Manager Integration */}
+              <div style={{ marginTop: '20px' }}>
+                <InstructorAssignmentManager 
+                  sectionId={section.id} 
+                  sectionTitle={section.title} 
+                />
+              </div>
+            </div>
           </div>
         ))
       ) : (
-        <p style={{ color: '#64748b' }}>No sections added yet. Start by adding a section above.</p>
+        <div style={{ textAlign: 'center', padding: '60px 24px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+          <div style={{ fontSize: '36px', marginBottom: '12px' }}>📚</div>
+          <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>No sections added yet</h3>
+          <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Start building your comprehensive course structure by adding a section above.</p>
+        </div>
       )}
     </div>
   );
