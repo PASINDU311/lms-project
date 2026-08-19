@@ -176,3 +176,84 @@ func SubmitQuiz(c *gin.Context) {
 		"passed":        passed,
 	})
 }
+
+// Update Quiz with Questions & Options (Instructor/Admin)
+func UpdateQuiz(c *gin.Context) {
+	quizID := c.Param("id")
+
+	var quiz models.Quiz
+	if err := config.DB.First(&quiz, quizID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Quiz not found"})
+		return
+	}
+
+	var input struct {
+		Title     string `json:"title" binding:"required"`
+		Questions []struct {
+			ID       uint   `json:"id"`
+			Question string `json:"question" binding:"required"`
+			Options  []struct {
+				ID         uint   `json:"id"`
+				OptionText string `json:"option_text" binding:"required"`
+				IsCorrect  bool   `json:"is_correct"`
+			} `json:"options" binding:"required"`
+		} `json:"questions" binding:"required"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 1. Update Quiz Title
+	quiz.Title = input.Title
+	config.DB.Save(&quiz)
+
+	// 2. Remove existing questions and options (Re-creating simplifies full updates)
+	var existingQuestions []models.Question
+	config.DB.Where("quiz_id = ?", quiz.ID).Find(&existingQuestions)
+	for _, q := range existingQuestions {
+		config.DB.Where("question_id = ?", q.ID).Delete(&models.Option{})
+	}
+	config.DB.Where("quiz_id = ?", quiz.ID).Delete(&models.Question{})
+
+	// 3. Save new/updated questions & options
+	for _, qInput := range input.Questions {
+		question := models.Question{
+			QuizID:   quiz.ID,
+			Question: qInput.Question,
+		}
+		config.DB.Create(&question)
+
+		for _, optInput := range qInput.Options {
+			option := models.Option{
+				QuestionID: question.ID,
+				OptionText: optInput.OptionText,
+				IsCorrect:  optInput.IsCorrect,
+			}
+			config.DB.Create(&option)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Quiz updated successfully", "quiz": quiz})
+}
+
+// Delete Quiz (Instructor/Admin)
+func DeleteQuiz(c *gin.Context) {
+	quizID := c.Param("id")
+
+	// Delete Quiz (GORM CASCADE will handle questions and options)
+	if err := config.DB.Select("Questions").Delete(&models.Quiz{ID: parseUint(quizID)}).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete quiz"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Quiz deleted successfully"})
+}
+
+// Helper function to parse string ID
+func parseUint(s string) uint {
+	var id uint
+	fmt.Sscanf(s, "%d", &id)
+	return id
+}

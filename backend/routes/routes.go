@@ -94,6 +94,8 @@ func SetupRouter() *gin.Engine {
 
 			// Quiz Management (Instructor / Admin)
 			instructorAdmin.POST("/quizzes", controllers.CreateQuiz)
+			instructorAdmin.PUT("/quizzes/:id", controllers.UpdateQuiz)    // 👈 NEW
+			instructorAdmin.DELETE("/quizzes/:id", controllers.DeleteQuiz)
 
 			// Assignment Management (Instructor)
 			instructorAdmin.POST("/assignments", controllers.CreateAssignment)
