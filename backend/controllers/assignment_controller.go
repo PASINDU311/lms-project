@@ -168,3 +168,52 @@ func GetMySubmission(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"submission": submission})
 }
+
+// 7. Update Assignment (Instructor / Admin)
+func UpdateAssignment(c *gin.Context) {
+	assignmentID := c.Param("id")
+
+	var assignment models.Assignment
+	if err := config.DB.First(&assignment, assignmentID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Assignment not found"})
+		return
+	}
+
+	var input struct {
+		Title       string     `json:"title"`
+		Description string     `json:"description"`
+		MaxMarks    float64    `json:"max_marks"`
+		DueDate     *time.Time `json:"due_date"`
+	}
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	assignment.Title = input.Title
+	assignment.Description = input.Description
+	if input.MaxMarks > 0 {
+		assignment.MaxMarks = input.MaxMarks
+	}
+	assignment.DueDate = input.DueDate
+
+	if err := config.DB.Save(&assignment).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update assignment"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Assignment updated successfully", "assignment": assignment})
+}
+
+// 8. Delete Assignment (Instructor / Admin)
+func DeleteAssignment(c *gin.Context) {
+	assignmentID := c.Param("id")
+
+	if err := config.DB.Delete(&models.Assignment{}, assignmentID).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete assignment"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Assignment deleted successfully"})
+}

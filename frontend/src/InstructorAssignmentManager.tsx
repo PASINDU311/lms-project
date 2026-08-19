@@ -28,7 +28,7 @@ interface Props {
   sectionTitle: string;
 }
 
-const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle }) => {
+const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
@@ -37,6 +37,13 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
   const [description, setDescription] = useState('');
   const [maxMarks, setMaxMarks] = useState<number>(100);
   const [dueDate, setDueDate] = useState('');
+
+  // Edit Assignment State
+  const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editMaxMarks, setEditMaxMarks] = useState<number>(100);
+  const [editDueDate, setEditDueDate] = useState('');
 
   // Submissions State for Grading
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null);
@@ -79,6 +86,54 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
       fetchAssignments();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to create assignment');
+    }
+  };
+
+  // Open Edit Form
+  const handleEditClick = (assignment: Assignment) => {
+    setEditingAssignment(assignment);
+    setEditTitle(assignment.title);
+    setEditDescription(assignment.description);
+    setEditMaxMarks(assignment.max_marks);
+    // Format Date for datetime-local input
+    if (assignment.due_date) {
+      const formattedDate = new Date(assignment.due_date).toISOString().slice(0, 16);
+      setEditDueDate(formattedDate);
+    } else {
+      setEditDueDate('');
+    }
+  };
+
+  // Save Edit Assignment
+  const handleUpdateAssignment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAssignment) return;
+
+    try {
+      await API.put(`/assignments/${editingAssignment.id}`, {
+        title: editTitle,
+        description: editDescription,
+        max_marks: Number(editMaxMarks),
+        due_date: editDueDate ? new Date(editDueDate).toISOString() : null,
+      });
+      alert('Assignment updated successfully!');
+      setEditingAssignment(null);
+      fetchAssignments();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to update assignment');
+    }
+  };
+
+  // Delete Assignment
+  const handleDeleteAssignment = async (id: number) => {
+    if (window.confirm('Are you sure you want to delete this assignment? All submissions will be deleted!')) {
+      try {
+        await API.delete(`/assignments/${id}`);
+        alert('Assignment deleted successfully!');
+        fetchAssignments();
+      } catch (err: any) {
+        alert(err.response?.data?.error || 'Failed to delete assignment');
+      }
     }
   };
 
@@ -164,7 +219,7 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
               />
             </div>
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Deadline (Due Date & Time):</label>
+              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Deadline:</label>
               <input
                 type="datetime-local"
                 value={dueDate}
@@ -179,11 +234,62 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
         </form>
       )}
 
+      {/* Edit Assignment Form Form/Modal */}
+      {editingAssignment && (
+        <form onSubmit={handleUpdateAssignment} style={{ marginTop: '10px', background: '#fffef0', padding: '10px', borderRadius: '4px', border: '1px solid #f1c40f' }}>
+          <h6 style={{ margin: '0 0 8px 0', color: '#d35400' }}>✏️ Edit Assignment</h6>
+          <input
+            type="text"
+            placeholder="Assignment Title"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            required
+            style={{ width: '100%', padding: '6px', marginBottom: '8px', boxSizing: 'border-box' }}
+          />
+          <textarea
+            placeholder="Instructions / Description"
+            value={editDescription}
+            onChange={(e) => setEditDescription(e.target.value)}
+            required
+            rows={2}
+            style={{ width: '100%', padding: '6px', marginBottom: '8px', boxSizing: 'border-box' }}
+          />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Max Marks:</label>
+              <input
+                type="number"
+                value={editMaxMarks}
+                onChange={(e) => setEditMaxMarks(Number(e.target.value))}
+                style={{ width: '80px', padding: '4px' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Deadline:</label>
+              <input
+                type="datetime-local"
+                value={editDueDate}
+                onChange={(e) => setEditDueDate(e.target.value)}
+                style={{ padding: '4px', fontSize: '12px' }}
+              />
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button type="submit" style={{ padding: '6px 12px', background: '#2980b9', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}>
+              Update Assignment
+            </button>
+            <button type="button" onClick={() => setEditingAssignment(null)} style={{ padding: '6px 12px', background: '#7f8c8d', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}>
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
+
       {/* Existing Assignments List */}
       <div style={{ marginTop: '10px' }}>
         {assignments.map((assignment) => (
           <div key={assignment.id} style={{ background: '#fff', padding: '10px', borderRadius: '4px', marginBottom: '8px', border: '1px solid #cbd5e1' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
                 <strong style={{ fontSize: '13px', color: '#1e293b' }}>{assignment.title}</strong>
                 <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#64748b' }}>
@@ -195,12 +301,28 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
                   )}
                 </p>
               </div>
-              <button
-                onClick={() => handleViewSubmissions(assignment.id)}
-                style={{ padding: '4px 10px', background: '#2980b9', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
-              >
-                {selectedAssignmentId === assignment.id ? 'Hide Submissions' : 'View Submissions & Grade 🎯'}
-              </button>
+
+              {/* Action Buttons: Edit, Delete, View Submissions */}
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <button
+                  onClick={() => handleEditClick(assignment)}
+                  style={{ padding: '4px 8px', background: '#f39c12', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
+                >
+                  ✏️ Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteAssignment(assignment.id)}
+                  style={{ padding: '4px 8px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
+                >
+                  🗑️ Delete
+                </button>
+                <button
+                  onClick={() => handleViewSubmissions(assignment.id)}
+                  style={{ padding: '4px 8px', background: '#2980b9', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}
+                >
+                  {selectedAssignmentId === assignment.id ? 'Hide' : 'Submissions 🎯'}
+                </button>
+              </div>
             </div>
 
             {/* Submissions List & Grading UI */}

@@ -97,6 +97,8 @@ func SetupRouter() *gin.Engine {
 
 			// Assignment Management (Instructor)
 			instructorAdmin.POST("/assignments", controllers.CreateAssignment)
+			instructorAdmin.PUT("/assignments/:id", controllers.UpdateAssignment)    // 👈 NEW
+			instructorAdmin.DELETE("/assignments/:id", controllers.DeleteAssignment)
 			instructorAdmin.GET("/assignments/:assignment_id/submissions", controllers.GetAssignmentSubmissions)
 			instructorAdmin.PUT("/assignments/submissions/:submission_id/grade", controllers.GradeAssignment)
 
