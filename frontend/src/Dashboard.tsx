@@ -570,24 +570,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
 
-          <button
-            onClick={handleLogout}
-            style={{
-              background: '#ffffff',
-              border: '1px solid #e2e8f0',
-              padding: '9px 16px',
-              borderRadius: 10,
-              color: '#dc2626',
-              fontSize: 13.5,
-              fontWeight: 600,
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            🚪 Logout
-          </button>
+        
         </div>
 
         {/* Analytics Grid */}
