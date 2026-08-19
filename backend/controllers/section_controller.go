@@ -20,6 +20,7 @@ type CreateLessonInput struct {
 	Title       string `json:"title" binding:"required"`
 	ContentType string `json:"content_type"`
 	VideoURL    string `json:"video_url"`
+	PdfURL      string `json:"pdf_url"` // Added
 	Content     string `json:"content"`
 	IsFree      bool   `json:"is_free"`
 	Order       int    `json:"order"`
@@ -52,7 +53,6 @@ func CreateSection(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Section created successfully", "section": section})
 }
 
-// UpdateSection — Section Title එක Update කිරීම
 func UpdateSection(c *gin.Context) {
 	id := c.Param("id")
 	var section models.Section
@@ -75,7 +75,6 @@ func UpdateSection(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Section updated successfully", "section": section})
 }
 
-// DeleteSection — Section එකක් Delete කිරීම
 func DeleteSection(c *gin.Context) {
 	id := c.Param("id")
 	var section models.Section
@@ -111,6 +110,7 @@ func CreateLesson(c *gin.Context) {
 		Title:       input.Title,
 		ContentType: input.ContentType,
 		VideoURL:    input.VideoURL,
+		PdfURL:      input.PdfURL,
 		Content:     input.Content,
 		IsFree:      input.IsFree,
 		Order:       input.Order,
@@ -124,7 +124,6 @@ func CreateLesson(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Lesson created successfully", "lesson": lesson})
 }
 
-// UpdateLesson — Lesson එකක විස්තර Update කිරීම
 func UpdateLesson(c *gin.Context) {
 	id := c.Param("id")
 	var lesson models.Lesson
@@ -137,6 +136,7 @@ func UpdateLesson(c *gin.Context) {
 	var input struct {
 		Title    string `json:"title"`
 		VideoURL string `json:"video_url"`
+		PdfURL   string `json:"pdf_url"` // Added
 		Content  string `json:"content"`
 	}
 
@@ -148,19 +148,19 @@ func UpdateLesson(c *gin.Context) {
 	config.DB.Model(&lesson).Updates(models.Lesson{
 		Title:    input.Title,
 		VideoURL: input.VideoURL,
+		PdfURL:   input.PdfURL,
 		Content:  input.Content,
 	})
 
 	c.JSON(http.StatusOK, gin.H{"message": "Lesson updated successfully", "lesson": lesson})
 }
 
-// DeleteLesson — Lesson එකක් Delete කිරීම
 func DeleteLesson(c *gin.Context) {
 	id := c.Param("id")
 	var lesson models.Lesson
 
 	if err := config.DB.First(&lesson, id).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Lesson not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Section not found"})
 		return
 	}
 

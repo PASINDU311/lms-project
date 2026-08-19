@@ -9,6 +9,7 @@ interface Lesson {
   title: string;
   content_type: string;
   video_url: string;
+  pdf_url?: string;
   content: string;
 }
 
@@ -39,6 +40,7 @@ const CourseBuilder: React.FC = () => {
   const [selectedSectionId, setSelectedSectionId] = useState<number | null>(null);
   const [lessonTitle, setLessonTitle] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
+  const [pdfUrl, setPdfUrl] = useState('');
   const [content, setContent] = useState('');
 
   // Edit Section State
@@ -49,6 +51,7 @@ const CourseBuilder: React.FC = () => {
   const [editingLessonId, setEditingLessonId] = useState<number | null>(null);
   const [editLessonTitle, setEditLessonTitle] = useState('');
   const [editLessonVideoUrl, setEditLessonVideoUrl] = useState('');
+  const [editLessonPdfUrl, setEditLessonPdfUrl] = useState('');
   const [editLessonContent, setEditLessonContent] = useState('');
 
   // Quiz Toggle State
@@ -120,14 +123,16 @@ const CourseBuilder: React.FC = () => {
       await API.post('/lessons', {
         section_id: selectedSectionId,
         title: lessonTitle,
-        content_type: 'VIDEO',
+        content_type: pdfUrl ? 'PDF' : 'VIDEO',
         video_url: videoUrl,
+        pdf_url: pdfUrl,
         content: content,
         is_free: false,
         order: 1,
       });
       setLessonTitle('');
       setVideoUrl('');
+      setPdfUrl('');
       setContent('');
       setSelectedSectionId(null);
       fetchCourseDetails();
@@ -143,6 +148,7 @@ const CourseBuilder: React.FC = () => {
       await API.put(`/lessons/${lessonId}`, {
         title: editLessonTitle,
         video_url: editLessonVideoUrl,
+        pdf_url: editLessonPdfUrl,
         content: editLessonContent,
       });
       setEditingLessonId(null);
@@ -186,7 +192,7 @@ const CourseBuilder: React.FC = () => {
 
   return (
     <div style={{ maxWidth: '1020px', margin: '0 auto', padding: '40px 24px', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif", color: '#0f172a', backgroundColor: '#f8fafc', minHeight: '100vh' }}>
-      
+
       {/* Breadcrumb Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
         <span style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>Dashboard</span>
@@ -256,7 +262,7 @@ const CourseBuilder: React.FC = () => {
       </div>
 
       <p style={{ color: '#64748b', fontSize: '15px', lineHeight: 1.6, margin: '0 0 32px 0', maxWidth: '820px' }}>
-        {course.description || 'Design and structure your curriculum. Add new multimedia lessons, modules, and quizzes to enhance the learning experience.'}
+        {course.description || 'Design and structure your curriculum. Add new multimedia lessons, PDF documents, modules, and quizzes to enhance the learning experience.'}
       </p>
 
       {/* Add New Section Input Bar */}
@@ -341,7 +347,7 @@ const CourseBuilder: React.FC = () => {
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: '240px' }}>
                 <span style={{ color: '#94a3b8', cursor: 'grab', fontSize: '15px', fontWeight: 700 }} title="Drag to reorder">::</span>
-                
+
                 {editingSectionId === section.id ? (
                   <div style={{ display: 'flex', gap: '10px', flex: 1, marginRight: '16px' }}>
                     <input
@@ -430,7 +436,14 @@ const CourseBuilder: React.FC = () => {
                             type="text"
                             value={editLessonVideoUrl}
                             onChange={(e) => setEditLessonVideoUrl(e.target.value)}
-                            placeholder="Video URL"
+                            placeholder="Video URL (optional)"
+                            style={{ width: '100%', padding: '10px 12px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }}
+                          />
+                          <input
+                            type="text"
+                            value={editLessonPdfUrl}
+                            onChange={(e) => setEditLessonPdfUrl(e.target.value)}
+                            placeholder="PDF Document URL (e.g. https://domain.com/lecture.pdf)"
                             style={{ width: '100%', padding: '10px 12px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none' }}
                           />
                           <textarea
@@ -454,7 +467,7 @@ const CourseBuilder: React.FC = () => {
                           <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                             <span style={{ color: '#cbd5e1', cursor: 'grab', fontSize: '14px' }}>::</span>
                             <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#e0e7ff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#4338ca', fontSize: '13px', fontWeight: 'bold' }}>
-                              ▶
+                              {lesson.pdf_url ? '📄' : '▶'}
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                               <span style={{ fontSize: '14.5px', fontWeight: 600, color: '#334155' }}>
@@ -463,6 +476,11 @@ const CourseBuilder: React.FC = () => {
                               {lesson.video_url && (
                                 <span style={{ backgroundColor: '#dcfce7', color: '#15803d', fontSize: '11.5px', fontWeight: 600, padding: '3px 10px', borderRadius: '20px' }}>
                                   Video Attached
+                                </span>
+                              )}
+                              {lesson.pdf_url && (
+                                <span style={{ backgroundColor: '#fef3c7', color: '#b45309', fontSize: '11.5px', fontWeight: 600, padding: '3px 10px', borderRadius: '20px' }}>
+                                  📄 PDF Attached
                                 </span>
                               )}
                             </div>
@@ -474,6 +492,7 @@ const CourseBuilder: React.FC = () => {
                                 setEditingLessonId(lesson.id);
                                 setEditLessonTitle(lesson.title);
                                 setEditLessonVideoUrl(lesson.video_url || '');
+                                setEditLessonPdfUrl(lesson.pdf_url || '');
                                 setEditLessonContent(lesson.content || '');
                               }}
                               style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px' }}
@@ -521,6 +540,13 @@ const CourseBuilder: React.FC = () => {
                     placeholder="YouTube Video URL (optional)"
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
+                    style={{ width: '100%', padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none', fontSize: '14px' }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="PDF Document URL (optional, e.g., https://domain.com/lecture.pdf)"
+                    value={pdfUrl}
+                    onChange={(e) => setPdfUrl(e.target.value)}
                     style={{ width: '100%', padding: '10px 14px', marginBottom: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none', fontSize: '14px' }}
                   />
                   <textarea
@@ -606,9 +632,9 @@ const CourseBuilder: React.FC = () => {
 
               {/* Instructor Assignment Manager Integration */}
               <div style={{ marginTop: '20px' }}>
-                <InstructorAssignmentManager 
-                  sectionId={section.id} 
-                  sectionTitle={section.title} 
+                <InstructorAssignmentManager
+                  sectionId={section.id}
+                  sectionTitle={section.title}
                 />
               </div>
             </div>

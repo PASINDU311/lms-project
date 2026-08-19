@@ -38,6 +38,7 @@ type Lesson struct {
 	Title       string         `gorm:"size:255;not null" json:"title"`
 	ContentType string         `gorm:"size:50;default:'VIDEO'" json:"content_type"` // VIDEO, PDF, TEXT
 	VideoURL    string         `gorm:"size:500" json:"video_url"`
+	PdfURL      string         `gorm:"size:500" json:"pdf_url"` // Added for Lecture PDF Attachment
 	Content     string         `gorm:"type:text" json:"content"`
 	IsFree      bool           `gorm:"default:false" json:"is_free"`
 	Order       int            `gorm:"default:1" json:"order"`
@@ -46,7 +47,6 @@ type Lesson struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
-// Course Progress tracking structure
 type LessonProgress struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	UserID    uint      `gorm:"not null;uniqueIndex:idx_user_lesson" json:"user_id"`

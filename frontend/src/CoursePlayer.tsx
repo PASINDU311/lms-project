@@ -12,6 +12,7 @@ interface Lesson {
   title: string;
   content_type: string;
   video_url: string;
+  pdf_url?: string;
   content: string;
   is_free: boolean;
 }
@@ -435,7 +436,7 @@ const CoursePlayer: React.FC = () => {
                 )}
               </div>
 
-              {/* Video Player Container with 16:9 Aspect Ratio */}
+              {/* Video Player Container */}
               {selectedLesson.video_url && (
                 <div
                   style={{
@@ -463,6 +464,83 @@ const CoursePlayer: React.FC = () => {
                       border: 'none',
                     }}
                   />
+                </div>
+              )}
+
+              {/* Lecture PDF Section (Embedded Viewer + Download Button) */}
+              {selectedLesson.pdf_url && (
+                <div
+                  style={{
+                    background: '#ffffff',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: 16,
+                    padding: 24,
+                    marginBottom: 28,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: 16,
+                      flexWrap: 'wrap',
+                      gap: 12,
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 24 }}>📄</span>
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#0f172a' }}>
+                          Lecture Document / PDF
+                        </h4>
+                        <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
+                          View or download materials for this lesson
+                        </p>
+                      </div>
+                    </div>
+
+                    <a
+                      href={selectedLesson.pdf_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      download
+                      style={{
+                        padding: '10px 18px',
+                        backgroundColor: '#4f46e5',
+                        color: '#ffffff',
+                        textDecoration: 'none',
+                        borderRadius: 8,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        boxShadow: '0 2px 6px rgba(79, 70, 229, 0.2)',
+                      }}
+                    >
+                      <span>⬇</span> Download PDF
+                    </a>
+                  </div>
+
+                  {/* Embedded PDF Viewer */}
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '600px',
+                      borderRadius: 12,
+                      overflow: 'hidden',
+                      border: '1px solid #cbd5e1',
+                      background: '#f8fafc',
+                    }}
+                  >
+                    <iframe
+                      src={selectedLesson.pdf_url}
+                      title="PDF Document Viewer"
+                      style={{ width: '100%', height: '100%', border: 'none' }}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -638,8 +716,8 @@ const CoursePlayer: React.FC = () => {
                                   }}
                                 >
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
-                                    <span style={{ fontSize: 11, color: isSelected ? '#4f46e5' : '#94a3b8' }}>
-                                      ▶
+                                    <span style={{ fontSize: 12, color: isSelected ? '#4f46e5' : '#94a3b8' }}>
+                                      {lesson.pdf_url ? '📄' : '▶'}
                                     </span>
                                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                       {lesson.title}
