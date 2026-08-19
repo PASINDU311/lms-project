@@ -131,6 +131,12 @@ const CoursePlayer: React.FC = () => {
 
   const isInstructorOrAdmin = userRole === 'INSTRUCTOR' || userRole === 'ADMIN';
 
+  // Section card top rule color palette generator
+  const getAccentColor = (index: number) => {
+    const colors = ['#2B4A3E', '#3D5A73', '#B98A1E', '#B5482F']; // Forest, Slate, Marigold, Brick
+    return colors[index % colors.length];
+  };
+
   if (loading) {
     return (
       <div
@@ -140,24 +146,27 @@ const CoursePlayer: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f8fafc',
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+          background: '#FAF8F3',
+          fontFamily: "'Inter', sans-serif",
         }}
       >
+        <style>
+          {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
+        </style>
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+          transition={{ repeat: Infinity, duration: 1.2, ease: 'linear' }}
           style={{
-            width: 40,
-            height: 40,
+            width: 32,
+            height: 32,
             borderRadius: '50%',
-            border: '3px solid #e2e8f0',
-            borderTopColor: '#4f46e5',
+            border: '2px solid #E4DFD1',
+            borderTopColor: '#2B4A3E',
             marginBottom: 16,
           }}
         />
-        <p style={{ color: '#64748b', fontSize: 14, fontWeight: 500 }}>
-          Loading Classroom...
+        <p style={{ color: '#6B6558', fontSize: 13, fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Loading Record...
         </p>
       </div>
     );
@@ -171,12 +180,31 @@ const CoursePlayer: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f8fafc',
+          background: '#FAF8F3',
           fontFamily: "'Inter', sans-serif",
-          color: '#64748b',
+          color: '#201F1C',
+          padding: 24,
         }}
       >
-        Course content not found.
+        <style>
+          {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
+        </style>
+        <div
+          style={{
+            border: '1.5px dashed #D2CBB8',
+            borderRadius: 8,
+            padding: '32px 48px',
+            background: '#FFFFFF',
+            textAlign: 'center',
+          }}
+        >
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: '#A39C8C', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>
+            Catalog Error
+          </span>
+          <p style={{ margin: 0, fontFamily: "'Fraunces', serif", fontSize: 18, color: '#201F1C' }}>
+            Course content not found.
+          </p>
+        </div>
       </div>
     );
   }
@@ -184,14 +212,18 @@ const CoursePlayer: React.FC = () => {
   return (
     <div
       style={{
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        fontFamily: "'Inter', sans-serif",
         minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: '#f8fafc',
-        color: '#0f172a',
+        background: '#FAF8F3',
+        color: '#201F1C',
       }}
     >
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
+      </style>
+
       {showCertificate && (
         <Certificate
           studentName={studentName}
@@ -201,15 +233,15 @@ const CoursePlayer: React.FC = () => {
         />
       )}
 
-      {/* Top Header Navigation */}
+      {/* Top Ledger Header Bar */}
       <header
         style={{
-          background: '#0f172a',
-          color: '#ffffff',
+          background: '#FFFFFF',
+          color: '#201F1C',
           position: 'sticky',
           top: 0,
           zIndex: 40,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+          borderBottom: '1px solid #E4DFD1',
         }}
       >
         <div
@@ -228,32 +260,40 @@ const CoursePlayer: React.FC = () => {
             <button
               onClick={() => navigate(isInstructorOrAdmin ? '/dashboard' : '/my-courses')}
               style={{
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: '#f8fafc',
-                border: '1px solid rgba(255,255,255,0.15)',
-                padding: '8px 14px',
-                borderRadius: 8,
+                background: 'transparent',
+                color: '#2B4A3E',
+                border: '1px solid #2B4A3E',
+                padding: '6px 12px',
+                borderRadius: 7,
                 cursor: 'pointer',
-                fontSize: 13,
+                fontSize: 12,
+                fontFamily: "'IBM Plex Mono', monospace",
                 fontWeight: 600,
+                letterSpacing: '0.05em',
+                textTransform: 'uppercase',
                 display: 'flex',
                 alignItems: 'center',
                 gap: 6,
                 transition: 'background 0.2s',
               }}
             >
-              ← <span style={{ display: 'inline-block' }}>Back</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>Back</span>
             </button>
 
-            <div style={{ width: 1, height: 24, background: '#334155' }} />
+            <div style={{ width: 1, height: 20, background: '#E4DFD1' }} />
 
             <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               <h1
                 style={{
                   margin: 0,
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: '#f8fafc',
+                  fontSize: 18,
+                  fontFamily: "'Fraunces', serif",
+                  fontWeight: 600,
+                  color: '#201F1C',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -261,36 +301,37 @@ const CoursePlayer: React.FC = () => {
               >
                 {course.title}
               </h1>
-              {!isInstructorOrAdmin && (
-                <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 500 }}>
-                  {completedLessonIds.length} of {totalLessons} lessons completed
-                </span>
-              )}
             </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
             {!isInstructorOrAdmin && progressPercent === 100 && (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ scale: 1.01 }}
+                whileTap={{ scale: 0.99 }}
                 onClick={() => setShowCertificate(true)}
                 style={{
-                  background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                  color: '#ffffff',
+                  background: '#2B4A3E',
+                  color: '#FAF8F3',
                   border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: 8,
+                  padding: '7px 14px',
+                  borderRadius: 7,
                   cursor: 'pointer',
-                  fontWeight: 700,
-                  fontSize: 13,
+                  fontWeight: 600,
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 12,
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
-                  boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)',
+                  gap: 8,
                 }}
               >
-                🏆 Claim Certificate
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 15l-2 5l9-5l-4-10l-3 10z"></path>
+                  <circle cx="12" cy="8" r="7"></circle>
+                </svg>
+                Claim Certificate
               </motion.button>
             )}
 
@@ -299,39 +340,35 @@ const CoursePlayer: React.FC = () => {
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 10,
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  padding: '6px 14px',
-                  borderRadius: 20,
-                  border: '1px solid rgba(255,255,255,0.08)',
+                  gap: 8,
+                  background: '#E7EEE9',
+                  padding: '4px 10px',
+                  borderRadius: 7,
+                  border: '1px solid #E4DFD1',
                 }}
               >
-                <div
+                <span
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    background: '#4f46e5',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: '#fff',
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: '#2B4A3E',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
                   }}
                 >
-                  {progressPercent}%
-                </div>
-                <div style={{ width: 80, height: 6, background: '#334155', borderRadius: 999, overflow: 'hidden' }}>
-                  <div
-                    style={{
-                      width: `${progressPercent}%`,
-                      height: '100%',
-                      background: '#10b981',
-                      transition: 'width 0.4s ease-out',
-                    }}
-                  />
-                </div>
+                  Status:
+                </span>
+                <span
+                  style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    color: '#2B4A3E',
+                  }}
+                >
+                  {progressPercent}% Complete
+                </span>
               </div>
             )}
           </div>
@@ -339,11 +376,11 @@ const CoursePlayer: React.FC = () => {
 
         {/* Global Progress Bar Line */}
         {!isInstructorOrAdmin && (
-          <div style={{ width: '100%', backgroundColor: '#1e293b', height: '3px' }}>
+          <div style={{ width: '100%', backgroundColor: '#E4DFD1', height: '2px' }}>
             <div
               style={{
                 width: `${progressPercent}%`,
-                backgroundColor: '#10b981',
+                backgroundColor: '#2B4A3E',
                 height: '100%',
                 transition: 'width 0.4s ease-out',
               }}
@@ -351,6 +388,46 @@ const CoursePlayer: React.FC = () => {
           </div>
         )}
       </header>
+
+      {/* Report Card Stat Strip */}
+      {!isInstructorOrAdmin && (
+        <div style={{ background: '#FFFFFF', borderBottom: '1px solid #E4DFD1' }}>
+          <div
+            style={{
+              maxWidth: 1600,
+              margin: '0 auto',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{ padding: '12px 24px', borderRight: '1px solid #E4DFD1' }}>
+              <span style={{ display: 'block', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: '#A39C8C', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>
+                Completed Units
+              </span>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20, fontWeight: 600, color: '#201F1C' }}>
+                {completedLessonIds.length}
+              </span>
+            </div>
+            <div style={{ padding: '12px 24px', borderRight: '1px solid #E4DFD1' }}>
+              <span style={{ display: 'block', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: '#A39C8C', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>
+                Total Syllabus Items
+              </span>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20, fontWeight: 600, color: '#201F1C' }}>
+                {totalLessons}
+              </span>
+            </div>
+            <div style={{ padding: '12px 24px' }}>
+              <span style={{ display: 'block', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: '#A39C8C', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 2 }}>
+                Current Progress
+              </span>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 20, fontWeight: 600, color: '#2B4A3E' }}>
+                {progressPercent}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Workspace Layout */}
       <div
@@ -370,221 +447,307 @@ const CoursePlayer: React.FC = () => {
           style={{
             flex: '1 1 65%',
             minWidth: 320,
-            padding: '28px 24px',
+            padding: '24px',
             boxSizing: 'border-box',
           }}
         >
           {selectedLesson ? (
             <motion.div
               key={selectedLesson.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.25 }}
+              transition={{ duration: 0.2 }}
             >
-              {/* Lesson Title & Completion Action Header */}
+              {/* Lesson Card */}
               <div
                 style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  gap: 16,
-                  marginBottom: 20,
-                  flexWrap: 'wrap',
+                  background: '#FFFFFF',
+                  border: '1px solid #E4DFD1',
+                  borderTop: '3px solid #2B4A3E',
+                  borderRadius: 8,
+                  padding: 24,
+                  marginBottom: 24,
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                <div>
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 700,
-                      color: '#4f46e5',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                    }}
-                  >
-                    Current Lesson
-                  </span>
-                  <h2 style={{ margin: '4px 0 0 0', fontSize: 22, fontWeight: 800, color: '#0f172a' }}>
-                    {selectedLesson.title}
-                  </h2>
-                </div>
-
-                {!isInstructorOrAdmin && (
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={() => toggleComplete(selectedLesson.id)}
-                    style={{
-                      padding: '10px 20px',
-                      backgroundColor: completedLessonIds.includes(selectedLesson.id) ? '#10b981' : '#4f46e5',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: 10,
-                      cursor: 'pointer',
-                      fontWeight: 600,
-                      fontSize: 13.5,
-                      boxShadow: completedLessonIds.includes(selectedLesson.id)
-                        ? '0 2px 8px rgba(16, 185, 129, 0.25)'
-                        : '0 2px 8px rgba(79, 70, 229, 0.25)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 8,
-                    }}
-                  >
-                    {completedLessonIds.includes(selectedLesson.id) ? '✓ Completed' : 'Mark as Complete'}
-                  </motion.button>
-                )}
-              </div>
-
-              {/* Video Player Container */}
-              {selectedLesson.video_url && (
-                <div
-                  style={{
-                    position: 'relative',
-                    paddingTop: '56.25%',
-                    background: '#000000',
-                    borderRadius: 16,
-                    overflow: 'hidden',
-                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                    marginBottom: 24,
-                  }}
-                >
-                  <iframe
-                    src={getEmbedUrl(selectedLesson.video_url)}
-                    title={selectedLesson.title}
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      width: '100%',
-                      height: '100%',
-                      border: 'none',
-                    }}
-                  />
-                </div>
-              )}
-
-              {/* Lecture PDF Section (Embedded Viewer + Download Button) */}
-              {selectedLesson.pdf_url && (
-                <div
-                  style={{
-                    background: '#ffffff',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 16,
-                    padding: 24,
-                    marginBottom: 28,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.03)',
-                  }}
-                >
+                {/* Stamp Badge */}
+                {completedLessonIds.includes(selectedLesson.id) && !isInstructorOrAdmin && (
                   <div
                     style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: 16,
-                      flexWrap: 'wrap',
-                      gap: 12,
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      transform: 'rotate(12deg)',
+                      border: '1.5px solid #2B4A3E',
+                      color: '#2B4A3E',
+                      padding: '2px 8px',
+                      borderRadius: 4,
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10,
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      background: '#E7EEE9',
+                      pointerEvents: 'none',
                     }}
                   >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <span style={{ fontSize: 24 }}>📄</span>
-                      <div>
-                        <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#0f172a' }}>
-                          Lecture Document / PDF
-                        </h4>
-                        <p style={{ margin: 0, fontSize: 12, color: '#64748b' }}>
-                          View or download materials for this lesson
-                        </p>
-                      </div>
-                    </div>
+                    PASSED / RECORDED
+                  </div>
+                )}
 
-                    <a
-                      href={selectedLesson.pdf_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
+                {/* Lesson Title & Completion Header */}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 16,
+                    marginBottom: 20,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div>
+                    <span
                       style={{
-                        padding: '10px 18px',
-                        backgroundColor: '#4f46e5',
-                        color: '#ffffff',
-                        textDecoration: 'none',
-                        borderRadius: 8,
-                        fontSize: 13,
+                        fontSize: 11,
+                        fontFamily: "'IBM Plex Mono', monospace",
                         fontWeight: 600,
+                        color: '#6B6558',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      Active Lesson Item
+                    </span>
+                    <h2
+                      style={{
+                        margin: '4px 0 0 0',
+                        fontSize: 22,
+                        fontFamily: "'Fraunces', serif",
+                        fontWeight: 600,
+                        color: '#201F1C',
+                      }}
+                    >
+                      {selectedLesson.title}
+                    </h2>
+                  </div>
+
+                  {!isInstructorOrAdmin && (
+                    <motion.button
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => toggleComplete(selectedLesson.id)}
+                      style={{
+                        padding: '8px 16px',
+                        backgroundColor: completedLessonIds.includes(selectedLesson.id) ? '#2B4A3E' : 'transparent',
+                        color: completedLessonIds.includes(selectedLesson.id) ? '#FAF8F3' : '#2B4A3E',
+                        border: '1px solid #2B4A3E',
+                        borderRadius: 7,
+                        cursor: 'pointer',
+                        fontWeight: 600,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 12,
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 8,
-                        boxShadow: '0 2px 6px rgba(79, 70, 229, 0.2)',
                       }}
                     >
-                      <span>⬇</span> Download PDF
-                    </a>
-                  </div>
+                      {completedLessonIds.includes(selectedLesson.id) ? (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                          Completed
+                        </>
+                      ) : (
+                        'Mark as Complete'
+                      )}
+                    </motion.button>
+                  )}
+                </div>
 
-                  {/* Embedded PDF Viewer */}
+                {/* Video Player Container */}
+                {selectedLesson.video_url && (
                   <div
                     style={{
-                      width: '100%',
-                      height: '600px',
-                      borderRadius: 12,
+                      position: 'relative',
+                      paddingTop: '56.25%',
+                      background: '#201F1C',
+                      borderRadius: 6,
                       overflow: 'hidden',
-                      border: '1px solid #cbd5e1',
-                      background: '#f8fafc',
+                      border: '1px solid #E4DFD1',
+                      marginBottom: 20,
                     }}
                   >
                     <iframe
-                      src={selectedLesson.pdf_url}
-                      title="PDF Document Viewer"
-                      style={{ width: '100%', height: '100%', border: 'none' }}
+                      src={getEmbedUrl(selectedLesson.video_url)}
+                      title={selectedLesson.title}
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                      }}
                     />
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Text / Lesson Content Card */}
-              {selectedLesson.content && (
-                <div
-                  style={{
-                    background: '#ffffff',
-                    padding: 24,
-                    border: '1px solid #e2e8f0',
-                    borderRadius: 16,
-                    marginBottom: 28,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-                  }}
-                >
-                  <h4 style={{ margin: '0 0 12px 0', fontSize: 16, fontWeight: 700, color: '#0f172a' }}>
-                    Lesson Notes & Resources
-                  </h4>
-                  <p
+                {/* Lecture PDF Section */}
+                {selectedLesson.pdf_url && (
+                  <div
                     style={{
-                      margin: 0,
-                      lineHeight: '1.7',
-                      color: '#334155',
-                      fontSize: 14.5,
-                      whiteSpace: 'pre-line',
+                      background: '#FAF8F3',
+                      border: '1px solid #E4DFD1',
+                      borderRadius: 7,
+                      padding: 20,
+                      marginBottom: 20,
                     }}
                   >
-                    {selectedLesson.content}
-                  </p>
-                </div>
-              )}
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 16,
+                        flexWrap: 'wrap',
+                        gap: 12,
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 6,
+                            border: '1px solid #E4DFD1',
+                            background: '#FFFFFF',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#2B4A3E',
+                          }}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 style={{ margin: 0, fontSize: 15, fontFamily: "'Fraunces', serif", fontWeight: 600, color: '#201F1C' }}>
+                            Lecture Document / PDF
+                          </h4>
+                          <p style={{ margin: 0, fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: '#6B6558', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            Reference file for lesson record
+                          </p>
+                        </div>
+                      </div>
+
+                      <a
+                        href={selectedLesson.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{
+                          padding: '7px 14px',
+                          backgroundColor: '#2B4A3E',
+                          color: '#FAF8F3',
+                          textDecoration: 'none',
+                          borderRadius: 7,
+                          fontSize: 12,
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontWeight: 600,
+                          letterSpacing: '0.05em',
+                          textTransform: 'uppercase',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                          <polyline points="7 10 12 15 17 10"></polyline>
+                          <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download PDF
+                      </a>
+                    </div>
+
+                    {/* Embedded PDF Viewer */}
+                    <div
+                      style={{
+                        width: '100%',
+                        height: '550px',
+                        borderRadius: 6,
+                        overflow: 'hidden',
+                        border: '1px solid #E4DFD1',
+                        background: '#FFFFFF',
+                      }}
+                    >
+                      <iframe
+                        src={selectedLesson.pdf_url}
+                        title="PDF Document Viewer"
+                        style={{ width: '100%', height: '100%', border: 'none' }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Text / Lesson Content Card */}
+                {selectedLesson.content && (
+                  <div
+                    style={{
+                      background: '#FAF8F3',
+                      padding: 20,
+                      border: '1px solid #E4DFD1',
+                      borderRadius: 7,
+                    }}
+                  >
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: 15, fontFamily: "'Fraunces', serif", fontWeight: 600, color: '#201F1C' }}>
+                      Lesson Notes & Resources
+                    </h4>
+                    <p
+                      style={{
+                        margin: 0,
+                        lineHeight: '1.65',
+                        color: '#6B6558',
+                        fontSize: 14,
+                        whiteSpace: 'pre-line',
+                      }}
+                    >
+                      {selectedLesson.content}
+                    </p>
+                  </div>
+                )}
+              </div>
             </motion.div>
           ) : (
             <div
               style={{
-                background: '#ffffff',
+                background: '#FFFFFF',
                 padding: 40,
-                borderRadius: 16,
-                border: '1px solid #e2e8f0',
+                borderRadius: 8,
+                border: '1.5px dashed #D2CBB8',
                 textAlign: 'center',
-                color: '#64748b',
+                color: '#6B6558',
               }}
             >
-              Please select a lesson from the syllabus to start learning.
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: '#A39C8C', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 6 }}>
+                Catalog Selection Pending
+              </span>
+              <p style={{ margin: 0, fontFamily: "'Inter', sans-serif", fontSize: 14 }}>
+                The active viewer is empty. Select a lesson from the syllabus to begin.
+              </p>
             </div>
           )}
 
@@ -603,7 +766,7 @@ const CoursePlayer: React.FC = () => {
           )}
 
           {/* Course Reviews */}
-          <div style={{ marginTop: 32 }}>
+          <div style={{ marginTop: 24 }}>
             <CourseReviews courseId={Number(id)} isEnrolled={!isInstructorOrAdmin} />
           </div>
         </div>
@@ -613,8 +776,8 @@ const CoursePlayer: React.FC = () => {
           style={{
             flex: '1 1 30%',
             minWidth: 300,
-            borderLeft: '1px solid #e2e8f0',
-            background: '#ffffff',
+            borderLeft: '1px solid #E4DFD1',
+            background: '#FFFFFF',
             padding: 24,
             boxSizing: 'border-box',
           }}
@@ -625,52 +788,54 @@ const CoursePlayer: React.FC = () => {
               justifyContent: 'space-between',
               alignItems: 'center',
               marginBottom: 16,
+              paddingBottom: 12,
+              borderBottom: '1px solid #E4DFD1',
             }}
           >
-            <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0f172a', margin: 0 }}>
+            <h3 style={{ fontSize: 16, fontFamily: "'Fraunces', serif", fontWeight: 600, color: '#201F1C', margin: 0 }}>
               Course Syllabus
             </h3>
-            <span style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>
+            <span style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600, color: '#A39C8C', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {course.sections?.length || 0} Modules
             </span>
           </div>
-
-          <hr style={{ border: 'none', borderTop: '1px solid #f1f5f9', margin: '0 0 20px 0' }} />
 
           {course.sections && course.sections.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {course.sections.map((section, index) => {
                 const isExpanded = expandedSections[section.id] ?? true;
+                const topRuleColor = getAccentColor(index);
 
                 return (
                   <div
                     key={section.id}
                     style={{
-                      border: '1px solid #e2e8f0',
-                      borderRadius: 12,
+                      border: '1px solid #E4DFD1',
+                      borderTop: `3px solid ${topRuleColor}`,
+                      borderRadius: 8,
                       overflow: 'hidden',
-                      background: '#ffffff',
+                      background: '#FFFFFF',
                     }}
                   >
                     {/* Section Accordion Title */}
                     <div
                       onClick={() => toggleSection(section.id)}
                       style={{
-                        padding: '12px 16px',
-                        background: '#f8fafc',
+                        padding: '10px 14px',
+                        background: '#FAF8F3',
                         cursor: 'pointer',
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
                         userSelect: 'none',
-                        borderBottom: isExpanded ? '1px solid #e2e8f0' : 'none',
+                        borderBottom: isExpanded ? '1px solid #E4DFD1' : 'none',
                       }}
                     >
-                      <span style={{ fontSize: 13.5, fontWeight: 700, color: '#1e293b' }}>
+                      <span style={{ fontSize: 13, fontFamily: "'Fraunces', serif", fontWeight: 600, color: '#201F1C' }}>
                         Module {index + 1}: {section.title}
                       </span>
-                      <span style={{ fontSize: 12, color: '#94a3b8' }}>
-                        {isExpanded ? '▲' : '▼'}
+                      <span style={{ fontSize: 11, fontFamily: "'IBM Plex Mono', monospace", color: '#A39C8C' }}>
+                        {isExpanded ? '[-]' : '[+]'}
                       </span>
                     </div>
 
@@ -683,7 +848,7 @@ const CoursePlayer: React.FC = () => {
                           exit={{ height: 0, opacity: 0 }}
                           style={{
                             listStyle: 'none',
-                            padding: 8,
+                            padding: '6px',
                             margin: 0,
                           }}
                         >
@@ -700,15 +865,15 @@ const CoursePlayer: React.FC = () => {
                                     setSelectedSectionId(section.id);
                                   }}
                                   style={{
-                                    padding: '10px 12px',
+                                    padding: '8px 10px',
                                     marginBottom: 4,
-                                    borderRadius: 8,
+                                    borderRadius: 6,
                                     cursor: 'pointer',
-                                    backgroundColor: isSelected ? '#e0e7ff' : '#ffffff',
-                                    color: isSelected ? '#3730a3' : '#334155',
-                                    border: isSelected ? '1px solid #c7d2fe' : '1px solid transparent',
-                                    fontSize: 13.5,
-                                    fontWeight: isSelected ? 600 : 500,
+                                    backgroundColor: isSelected ? '#E7EEE9' : 'transparent',
+                                    color: isSelected ? '#2B4A3E' : '#201F1C',
+                                    border: isSelected ? '1px solid #2B4A3E' : '1px solid transparent',
+                                    fontSize: 13,
+                                    fontWeight: isSelected ? 600 : 400,
                                     display: 'flex',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
@@ -716,8 +881,17 @@ const CoursePlayer: React.FC = () => {
                                   }}
                                 >
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, overflow: 'hidden' }}>
-                                    <span style={{ fontSize: 12, color: isSelected ? '#4f46e5' : '#94a3b8' }}>
-                                      {lesson.pdf_url ? '📄' : '▶'}
+                                    <span style={{ fontSize: 12, color: isSelected ? '#2B4A3E' : '#A39C8C', flexShrink: 0, display: 'flex' }}>
+                                      {lesson.pdf_url ? (
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                          <polyline points="14 2 14 8 20 8"></polyline>
+                                        </svg>
+                                      ) : (
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                                          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                        </svg>
+                                      )}
                                     </span>
                                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                       {lesson.title}
@@ -727,13 +901,15 @@ const CoursePlayer: React.FC = () => {
                                   {!isInstructorOrAdmin && isDone && (
                                     <span
                                       style={{
-                                        color: '#10b981',
+                                        color: '#2B4A3E',
                                         fontWeight: 700,
-                                        fontSize: 13,
+                                        fontFamily: "'IBM Plex Mono', monospace",
+                                        fontSize: 11,
                                         marginLeft: 8,
+                                        flexShrink: 0,
                                       }}
                                     >
-                                      ✓
+                                      [DONE]
                                     </span>
                                   )}
                                 </li>
@@ -747,7 +923,9 @@ const CoursePlayer: React.FC = () => {
               })}
             </div>
           ) : (
-            <p style={{ fontSize: 13.5, color: '#94a3b8', margin: 0 }}>No syllabus sections available.</p>
+            <p style={{ fontSize: 12, fontFamily: "'IBM Plex Mono', monospace", color: '#A39C8C', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+              The catalog is empty.
+            </p>
           )}
         </div>
       </div>

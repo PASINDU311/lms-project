@@ -38,245 +38,556 @@ const MyCourses: React.FC = () => {
   const getStatusBadgeStyle = (status: string) => {
     const isCompleted = status?.toLowerCase() === 'completed';
     return {
-      backgroundColor: isCompleted ? '#dcfce7' : '#e0e7ff',
-      color: isCompleted ? '#15803d' : '#4338ca',
-      border: `1px solid ${isCompleted ? '#86efac' : '#c7d2fe'}`,
+      backgroundColor: isCompleted ? '#E7EEE9' : '#FBF1DA',
+      color: isCompleted ? '#2B4A3E' : '#B98A1E',
+      borderColor: isCompleted ? '#2B4A3E' : '#B98A1E',
     };
   };
 
+  // Top border colors that cycle for visual rhythm across cards
+  const cardAccentColors = ['#2B4A3E', '#3D5A73', '#B98A1E', '#B5482F'];
+
+  // Summary statistics for report-card strip
+  const totalEnrolled = enrollments.length;
+  const completedCount = enrollments.filter(
+    (e) => e.status?.toLowerCase() === 'completed'
+  ).length;
+  const inProgressCount = totalEnrolled - completedCount;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+    <div
       style={{
-        maxWidth: '1140px',
-        margin: '30px auto',
-        padding: '0 20px',
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        backgroundColor: '#FAF8F3',
+        minHeight: '100vh',
+        padding: '32px 20px 60px 20px',
+        boxSizing: 'border-box',
+        color: '#201F1C',
+        fontFamily:
+          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
       }}
     >
-      {/* Header Section */}
-      <div
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+          @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+          }
+        `}
+      </style>
+
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '24px',
+          maxWidth: '1100px',
+          margin: '0 auto',
         }}
       >
-        <div>
+        {/* Navigation / Header Section */}
+        <div style={{ marginBottom: '28px' }}>
           <button
             onClick={() => navigate('/dashboard')}
             style={{
               background: 'none',
               border: 'none',
-              color: '#6366f1',
-              fontSize: '13px',
-              fontWeight: 600,
+              color: '#6B6558',
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '12px',
+              fontWeight: 500,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
               cursor: 'pointer',
               padding: 0,
-              marginBottom: '6px',
-              display: 'flex',
+              marginBottom: '12px',
+              display: 'inline-flex',
               alignItems: 'center',
-              gap: '4px',
+              gap: '6px',
             }}
           >
-            &larr; Back to Dashboard
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="19" y1="12" x2="5" y2="12" />
+              <polyline points="12 19 5 12 12 5" />
+            </svg>
+            Back to Dashboard
           </button>
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800, color: '#0f172a' }}>
-            My Enrolled Courses
-          </h2>
-        </div>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => navigate('/dashboard')}
-          style={{
-            padding: '9px 18px',
-            backgroundColor: '#ffffff',
-            color: '#334155',
-            border: '1px solid #cbd5e1',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '13.5px',
-            fontWeight: 600,
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-          }}
-        >
-          Explore Catalog
-        </motion.button>
-      </div>
-
-      {/* Main Content Area */}
-      {loading ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '20px' }}>
-          {[1, 2, 3].map((n) => (
-            <div
-              key={n}
-              style={{
-                height: '240px',
-                backgroundColor: '#f1f5f9',
-                borderRadius: '12px',
-                animation: 'pulse 1.5s infinite ease-in-out',
-              }}
-            />
-          ))}
-        </div>
-      ) : enrollments.length === 0 ? (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '60px 20px',
-            backgroundColor: '#ffffff',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0',
-            marginTop: '20px',
-          }}
-        >
-          <div style={{ fontSize: '42px', marginBottom: '12px' }}>📚</div>
-          <h3 style={{ margin: '0 0 8px 0', color: '#1e293b', fontSize: '18px', fontWeight: 700 }}>
-            No Enrolled Courses Found
-          </h3>
-          <p style={{ color: '#64748b', fontSize: '14px', margin: '0 0 20px 0' }}>
-            You haven't enrolled in any learning programs yet.
-          </p>
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => navigate('/dashboard')}
+          <div
             style={{
-              padding: '10px 20px',
-              backgroundColor: '#4f46e5',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '8px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontSize: '14px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              flexWrap: 'wrap',
+              gap: '16px',
+              paddingBottom: '16px',
+              borderBottom: '1px solid #E4DFD1',
             }}
           >
-            Browse Course Catalog
-          </motion.button>
-        </div>
-      ) : (
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: '24px',
-          }}
-        >
-          {enrollments.map((item, index) => {
-            const courseData = item.course || item.Course;
-            const badgeStyle = getStatusBadgeStyle(item.status);
-
-            return (
-              <motion.div
-                key={item.id}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25, delay: index * 0.05 }}
-                whileHover={{ y: -4 }}
+            <div>
+              <span
                 style={{
-                  backgroundColor: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '14px',
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  color: '#A39C8C',
+                  display: 'block',
+                  marginBottom: '4px',
                 }}
               >
-                {/* Visual Banner Placeholder */}
-                <div
+                STUDENT RECORD
+              </span>
+              <h1
+                style={{
+                  margin: 0,
+                  fontFamily: "'Fraunces', serif",
+                  fontSize: '30px',
+                  fontWeight: 600,
+                  color: '#201F1C',
+                  letterSpacing: '-0.01em',
+                }}
+              >
+                My Enrolled Courses
+              </h1>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => navigate('/dashboard')}
+              style={{
+                padding: '9px 16px',
+                backgroundColor: 'transparent',
+                color: '#2B4A3E',
+                border: '1.5px solid #2B4A3E',
+                borderRadius: '7px',
+                cursor: 'pointer',
+                fontSize: '13px',
+                fontWeight: 600,
+                fontFamily: "'Inter', sans-serif",
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Explore Catalog
+            </motion.button>
+          </div>
+        </div>
+
+        {/* Stat Strip / Report Card */}
+        {!loading && enrollments.length > 0 && (
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E4DFD1',
+              borderRadius: '8px',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              marginBottom: '32px',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                padding: '16px 20px',
+                borderRight: '1px solid #E4DFD1',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  color: '#A39C8C',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '6px',
+                }}
+              >
+                TOTAL ENROLLED
+              </div>
+              <div
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: '#201F1C',
+                }}
+              >
+                {String(totalEnrolled).padStart(2, '0')}
+              </div>
+            </div>
+
+            <div
+              style={{
+                padding: '16px 20px',
+                borderRight: '1px solid #E4DFD1',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  color: '#A39C8C',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '6px',
+                }}
+              >
+                IN PROGRESS
+              </div>
+              <div
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: '#3D5A73',
+                }}
+              >
+                {String(inProgressCount).padStart(2, '0')}
+              </div>
+            </div>
+
+            <div style={{ padding: '16px 20px' }}>
+              <div
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  color: '#A39C8C',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  marginBottom: '6px',
+                }}
+              >
+                COMPLETED
+              </div>
+              <div
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '24px',
+                  fontWeight: 600,
+                  color: '#2B4A3E',
+                }}
+              >
+                {String(completedCount).padStart(2, '0')}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Main Content Area */}
+        {loading ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '24px',
+            }}
+          >
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                style={{
+                  height: '220px',
+                  backgroundColor: '#FFFFFF',
+                  border: '1px solid #E4DFD1',
+                  borderRadius: '10px',
+                  padding: '20px',
+                  animation: 'pulse 1.5s infinite ease-in-out',
+                }}
+              />
+            ))}
+          </div>
+        ) : enrollments.length === 0 ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '56px 24px',
+              backgroundColor: '#FFFFFF',
+              borderRadius: '10px',
+              border: '1.5px dashed #D2CBB8',
+              marginTop: '16px',
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '48px',
+                height: '48px',
+                borderRadius: '50%',
+                backgroundColor: '#E7EEE9',
+                color: '#2B4A3E',
+                marginBottom: '16px',
+              }}
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </div>
+            <h3
+              style={{
+                margin: '0 0 8px 0',
+                fontFamily: "'Fraunces', serif",
+                fontSize: '20px',
+                fontWeight: 600,
+                color: '#201F1C',
+              }}
+            >
+              No course enrollments on file.
+            </h3>
+            <p
+              style={{
+                color: '#6B6558',
+                fontSize: '14px',
+                margin: '0 0 24px 0',
+                maxWidth: '400px',
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                lineHeight: 1.5,
+              }}
+            >
+              Your catalog intake slip is currently empty. Explore available programs to begin.
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              onClick={() => navigate('/dashboard')}
+              style={{
+                padding: '10px 22px',
+                backgroundColor: '#2B4A3E',
+                color: '#FAF8F3',
+                border: 'none',
+                borderRadius: '7px',
+                fontWeight: 600,
+                cursor: 'pointer',
+                fontSize: '13.5px',
+                fontFamily: "'Inter', sans-serif",
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              Browse Catalog
+            </motion.button>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+              gap: '24px',
+            }}
+          >
+            {enrollments.map((item, index) => {
+              const courseData = item.course || item.Course;
+              const badgeStyle = getStatusBadgeStyle(item.status);
+              const accentColor = cardAccentColors[index % cardAccentColors.length];
+
+              return (
+                <motion.div
+                  key={item.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: index * 0.04 }}
+                  whileHover={{ y: -3 }}
                   style={{
-                    height: '110px',
-                    background: 'linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)',
-                    padding: '16px',
-                    boxSizing: 'border-box',
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid #E4DFD1',
+                    borderTop: `3px solid ${accentColor}`,
+                    borderRadius: '9px',
+                    position: 'relative',
+                    overflow: 'hidden',
                     display: 'flex',
-                    justifyContent: 'flex-end',
-                    alignItems: 'flex-start',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
                   }}
                 >
-                  <span
+                  {/* Library Stamp Badge */}
+                  <div
                     style={{
-                      ...badgeStyle,
-                      padding: '4px 10px',
-                      borderRadius: '20px',
-                      fontSize: '11.5px',
-                      fontWeight: 700,
+                      position: 'absolute',
+                      top: '14px',
+                      right: '14px',
+                      transform: 'rotate(28deg)',
+                      backgroundColor: badgeStyle.backgroundColor,
+                      color: badgeStyle.color,
+                      border: `1.5px solid ${badgeStyle.borderColor}`,
+                      padding: '2px 8px',
+                      borderRadius: '4px',
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '10px',
+                      fontWeight: 600,
                       textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
+                      letterSpacing: '0.08em',
+                      pointerEvents: 'none',
+                      zIndex: 1,
                     }}
                   >
                     {item.status || 'Enrolled'}
-                  </span>
-                </div>
+                  </div>
 
-                {/* Card Body */}
-                <div style={{ padding: '20px', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3
-                    style={{
-                      margin: '0 0 8px 0',
-                      fontSize: '16.5px',
-                      fontWeight: 700,
-                      color: '#0f172a',
-                      lineHeight: 1.35,
-                    }}
-                  >
-                    {courseData ? courseData.title : `Course #${item.course_id}`}
-                  </h3>
+                  {/* Card Header & Metadata */}
+                  <div style={{ padding: '20px 20px 0 20px' }}>
+                    <div
+                      style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: '11px',
+                        fontWeight: 500,
+                        color: '#A39C8C',
+                        marginBottom: '6px',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      REF: #{String(courseData?.id || item.course_id).padStart(4, '0')}
+                    </div>
 
-                  <p
+                    <h3
+                      style={{
+                        margin: '0 0 10px 0',
+                        fontFamily: "'Fraunces', serif",
+                        fontSize: '18px',
+                        fontWeight: 600,
+                        color: '#201F1C',
+                        lineHeight: 1.3,
+                        paddingRight: '60px',
+                      }}
+                    >
+                      {courseData ? courseData.title : `Course #${item.course_id}`}
+                    </h3>
+                  </div>
+
+                  {/* Card Body */}
+                  <div
                     style={{
-                      margin: '0 0 20px 0',
-                      fontSize: '13.5px',
-                      color: '#64748b',
-                      lineHeight: 1.5,
+                      padding: '0 20px 20px 20px',
                       flexGrow: 1,
-                      display: '-webkit-box',
-                      WebkitLineClamp: 3,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                    }}
-                  >
-                    {courseData?.description || 'No description available for this course.'}
-                  </p>
-
-                  <motion.button
-                    whileHover={{ scale: 1.01 }}
-                    whileTap={{ scale: 0.99 }}
-                    onClick={() => navigate(`/learn/${item.course_id}`)}
-                    style={{
-                      width: '100%',
-                      padding: '10px 16px',
-                      backgroundColor: '#4f46e5',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontWeight: 600,
-                      fontSize: '13.5px',
-                      cursor: 'pointer',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      boxShadow: '0 2px 4px rgba(79, 70, 229, 0.2)',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
                     }}
                   >
-                    Start Learning <span>&rarr;</span>
-                  </motion.button>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
-    </motion.div>
+                    <p
+                      style={{
+                        margin: '0 0 20px 0',
+                        fontSize: '13.5px',
+                        color: '#6B6558',
+                        lineHeight: 1.55,
+                        display: '-webkit-box',
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: 'vertical',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      {courseData?.description || 'No course description recorded.'}
+                    </p>
+
+                    <div>
+                      {courseData?.price !== undefined && (
+                        <div
+                          style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            paddingTop: '12px',
+                            marginBottom: '14px',
+                            borderTop: '1px stroke #E4DFD1',
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: '11px',
+                            color: '#A39C8C',
+                          }}
+                        >
+                          <span>TUITION</span>
+                          <span style={{ color: '#201F1C', fontWeight: 600 }}>
+                            ${courseData.price.toFixed(2)}
+                          </span>
+                        </div>
+                      )}
+
+                      <motion.button
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                        onClick={() => navigate(`/learn/${item.course_id}`)}
+                        style={{
+                          width: '100%',
+                          padding: '10px 14px',
+                          backgroundColor: '#2B4A3E',
+                          color: '#FAF8F3',
+                          border: 'none',
+                          borderRadius: '7px',
+                          fontWeight: 600,
+                          fontSize: '13px',
+                          fontFamily: "'Inter', sans-serif",
+                          cursor: 'pointer',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        Start Learning
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <line x1="5" y1="12" x2="19" y2="12" />
+                          <polyline points="12 5 19 12 12 19" />
+                        </svg>
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </motion.div>
+    </div>
   );
 };
 

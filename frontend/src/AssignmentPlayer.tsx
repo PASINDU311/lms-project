@@ -56,15 +56,41 @@ const CountdownBadge: React.FC<{ dueDate: string }> = ({ dueDate }) => {
 
   if (timeLeft.expired) {
     return (
-      <span style={{ background: '#fef2f2', color: '#991b1b', border: '1px solid #fca5a5', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}>
-        🚫 Deadline Passed
+      <span
+        style={{
+          background: '#FBEAE3',
+          color: '#B5482F',
+          border: '1px solid #B5482F',
+          padding: '2px 8px',
+          borderRadius: '4px',
+          fontSize: '11px',
+          fontFamily: "'IBM Plex Mono', monospace",
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+          fontWeight: 600,
+        }}
+      >
+        Deadline Passed
       </span>
     );
   }
 
   return (
-    <span style={{ background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}>
-      ⏳ Due in: {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}{timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+    <span
+      style={{
+        background: '#FBF1DA',
+        color: '#B98A1E',
+        border: '1px solid #B98A1E',
+        padding: '2px 8px',
+        borderRadius: '4px',
+        fontSize: '11px',
+        fontFamily: "'IBM Plex Mono', monospace",
+        letterSpacing: '0.05em',
+        textTransform: 'uppercase',
+        fontWeight: 600,
+      }}
+    >
+      Due in: {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}{timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
     </span>
   );
 };
@@ -127,6 +153,8 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
     }
   };
 
+  const cardAccentColors = ['#2B4A3E', '#3D5A73', '#B98A1E', '#B5482F'];
+
   if (assignments.length === 0) return null;
 
   return (
@@ -135,56 +163,130 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
       animate={{ opacity: 1, y: 0 }}
       style={{
         marginTop: 24,
-        padding: 24,
-        backgroundColor: '#ffffff',
-        borderRadius: 16,
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.02)',
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        padding: 28,
+        backgroundColor: '#FFFFFF',
+        borderRadius: 10,
+        border: '1px solid #E4DFD1',
+        borderTop: '3px solid #2B4A3E',
+        fontFamily: "'Inter', sans-serif",
       }}
     >
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
+      </style>
+
+      {/* Header */}
       <div
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
-          marginBottom: 20,
-          paddingBottom: 12,
-          borderBottom: '1px solid #f1f5f9',
+          gap: 12,
+          marginBottom: 24,
+          paddingBottom: 16,
+          borderBottom: '1px solid #E4DFD1',
         }}
       >
-        <span style={{ fontSize: 20 }}>📝</span>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#201F1C"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
         <div>
-          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: '#0f172a' }}>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: 18,
+              fontWeight: 600,
+              color: '#201F1C',
+              fontFamily: "'Fraunces', serif",
+            }}
+          >
             Section Assignments
           </h3>
-          <p style={{ margin: '2px 0 0 0', fontSize: 13, color: '#64748b' }}>
+          <p
+            style={{
+              margin: '2px 0 0 0',
+              fontSize: 11,
+              color: '#A39C8C',
+              fontFamily: "'IBM Plex Mono', monospace",
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
             Complete the assignments below before the deadline.
           </p>
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {assignments.map((a) => {
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        {assignments.map((a, idx) => {
           const submission = submissions[a.id];
           const isExpired = a.due_date ? new Date(a.due_date).getTime() < new Date().getTime() : false;
+          const accentColor = cardAccentColors[idx % cardAccentColors.length];
 
           return (
             <div
               key={a.id}
               style={{
-                backgroundColor: '#f8fafc',
+                backgroundColor: '#FAF8F3',
                 padding: 20,
-                borderRadius: 12,
-                border: '1px solid #e2e8f0',
+                borderRadius: 8,
+                border: '1px solid #E4DFD1',
+                borderTop: `3px solid ${accentColor}`,
+                position: 'relative',
               }}
             >
+              {/* Stamp Badge for Submission Status */}
+              {submission && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '16px',
+                    right: '16px',
+                    transform: 'rotate(28deg)',
+                    backgroundColor: submission.status === 'GRADED' ? '#E7EEE9' : '#FBF1DA',
+                    color: submission.status === 'GRADED' ? '#2B4A3E' : '#B98A1E',
+                    border: `1.5px solid ${submission.status === 'GRADED' ? '#2B4A3E' : '#B98A1E'}`,
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: '10px',
+                    fontWeight: 600,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    pointerEvents: 'none',
+                    zIndex: 1,
+                  }}
+                >
+                  {submission.status === 'GRADED' ? 'GRADED' : 'PENDING'}
+                </div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
-                <div>
-                  <h4 style={{ margin: '0 0 6px 0', fontSize: 16, fontWeight: 700, color: '#1e293b' }}>
+                <div style={{ flex: 1, paddingRight: submission ? 70 : 0 }}>
+                  <h4
+                    style={{
+                      margin: '0 0 6px 0',
+                      fontSize: 16,
+                      fontWeight: 600,
+                      color: '#201F1C',
+                      fontFamily: "'Fraunces', serif",
+                    }}
+                  >
                     {a.title}
                   </h4>
-                  <p style={{ fontSize: 13.5, color: '#475569', margin: '0 0 12px 0', lineHeight: 1.5 }}>
+                  <p style={{ fontSize: 13.5, color: '#6B6558', margin: '0 0 12px 0', lineHeight: 1.5 }}>
                     {a.description}
                   </p>
                 </div>
@@ -192,16 +294,20 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                   {a.due_date && <CountdownBadge dueDate={a.due_date} />}
                   <span
                     style={{
-                      backgroundColor: '#e0e7ff',
-                      color: '#3730a3',
-                      fontSize: 12,
-                      fontWeight: 700,
-                      padding: '4px 10px',
-                      borderRadius: 20,
+                      backgroundColor: '#E9EFF3',
+                      color: '#3D5A73',
+                      border: '1px solid #3D5A73',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      letterSpacing: '0.05em',
+                      textTransform: 'uppercase',
+                      padding: '2px 8px',
+                      borderRadius: '4px',
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    Max Marks: {a.max_marks}
+                    MAX MARKS: {a.max_marks}
                   </span>
                 </div>
               </div>
@@ -211,42 +317,78 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                 <div
                   style={{
                     padding: '12px 16px',
-                    background: '#e0f2fe',
-                    color: '#0369a1',
-                    borderRadius: 8,
-                    fontSize: 13,
-                    fontWeight: 500,
+                    background: '#E9EFF3',
+                    color: '#3D5A73',
+                    border: '1px solid #E4DFD1',
+                    borderRadius: 7,
+                    fontSize: 12,
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
+                    marginTop: 12,
                   }}
                 >
-                  <span>ℹ️</span> Instructor/Admin View: Submissions and Grading options are available in Course Builder.
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
+                  </svg>
+                  Instructor/Admin View: Submissions and Grading options are available in Course Builder.
                 </div>
               ) : submission ? (
                 /* Student: Submission Status & Grade View */
                 <div
                   style={{
                     padding: 16,
-                    background: submission.status === 'GRADED' ? '#f0fdf4' : '#fffbeb',
-                    border: `1px solid ${submission.status === 'GRADED' ? '#bbf7d0' : '#fef08a'}`,
-                    borderRadius: 10,
+                    background: '#FFFFFF',
+                    border: '1px solid #E4DFD1',
+                    borderRadius: 8,
+                    marginTop: 12,
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                     <span
                       style={{
-                        fontSize: 13.5,
-                        fontWeight: 700,
-                        color: submission.status === 'GRADED' ? '#15803d' : '#b45309',
+                        fontSize: 12,
+                        fontWeight: 600,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                        color: submission.status === 'GRADED' ? '#2B4A3E' : '#B98A1E',
                         display: 'flex',
                         alignItems: 'center',
                         gap: 6,
                       }}
                     >
-                      {submission.status === 'GRADED' ? '✓ Graded' : '⏳ Submitted (Pending Review)'}
+                      {submission.status === 'GRADED' ? (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                          Graded
+                        </>
+                      ) : (
+                        <>
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                          </svg>
+                          Submitted (Pending Review)
+                        </>
+                      )}
                     </span>
-                    <span style={{ fontSize: 12, color: '#64748b' }}>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        color: '#A39C8C',
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
+                      }}
+                    >
                       Submitted on: {new Date(submission.created_at).toLocaleDateString()}
                     </span>
                   </div>
@@ -255,37 +397,62 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                     <div
                       style={{
                         marginTop: 12,
-                        padding: 12,
-                        background: '#ffffff',
+                        border: '1px solid #E4DFD1',
                         borderRadius: 8,
-                        border: '1px solid #86efac',
+                        overflow: 'hidden',
                       }}
                     >
-                      <div style={{ fontSize: 15, fontWeight: 700, color: '#15803d' }}>
-                        🎯 Your Grade: {submission.marks} / {a.max_marks}
+                      {/* Report-Card Strip for Grades */}
+                      <div
+                        style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                          backgroundColor: '#E7EEE9',
+                          borderBottom: submission.feedback ? '1px solid #E4DFD1' : 'none',
+                        }}
+                      >
+                        <div style={{ padding: '10px 14px', borderRight: '1px solid #E4DFD1' }}>
+                          <div style={{ fontSize: 10, fontWeight: 600, color: '#A39C8C', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.05em' }}>
+                            Your Grade
+                          </div>
+                          <div style={{ fontSize: 20, fontWeight: 600, color: '#2B4A3E', fontFamily: "'IBM Plex Mono', monospace" }}>
+                            {submission.marks} <span style={{ fontSize: 12, color: '#6B6558', fontWeight: 400 }}>/ {a.max_marks}</span>
+                          </div>
+                        </div>
                       </div>
+
                       {submission.feedback && (
-                        <p style={{ margin: '6px 0 0 0', fontSize: 13, color: '#334155' }}>
-                          💬 <strong>Instructor Feedback:</strong> {submission.feedback}
-                        </p>
+                        <div style={{ padding: '12px 14px', backgroundColor: '#FFFFFF' }}>
+                          <div style={{ fontSize: 10, fontWeight: 600, color: '#A39C8C', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.05em', marginBottom: 4 }}>
+                            Instructor Feedback
+                          </div>
+                          <p style={{ margin: 0, fontSize: 13, color: '#201F1C', lineHeight: 1.4 }}>
+                            {submission.feedback}
+                          </p>
+                        </div>
                       )}
                     </div>
                   )}
 
-                  <div style={{ marginTop: 12, fontSize: 13, color: '#334155', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ marginTop: 12, fontSize: 13, color: '#201F1C', display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {submission.content && (
                       <div>
-                        <strong>Your Answer:</strong> {submission.content}
+                        <strong style={{ color: '#6B6558', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Your Answer:
+                        </strong>{' '}
+                        <span>{submission.content}</span>
                       </div>
                     )}
                     {submission.submission_url && (
                       <div>
-                        <strong>Your Link:</strong>{' '}
+                        <strong style={{ color: '#6B6558', fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          Your Link:
+                        </strong>{' '}
                         <a
                           href={submission.submission_url}
                           target="_blank"
                           rel="noreferrer"
-                          style={{ color: '#4f46e5', textDecoration: 'underline', fontWeight: 500 }}
+                          style={{ color: '#2B4A3E', textDecoration: 'underline', fontWeight: 500 }}
                         >
                           {submission.submission_url}
                         </a>
@@ -298,38 +465,49 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                 <div
                   style={{
                     marginTop: 12,
-                    padding: 16,
-                    background: '#fef2f2',
-                    borderRadius: 10,
-                    border: '1px solid #fca5a5',
-                    color: '#991b1b',
-                    fontSize: 13.5,
+                    padding: 14,
+                    background: '#FBEAE3',
+                    borderRadius: 7,
+                    border: '1px solid #B5482F',
+                    color: '#B5482F',
+                    fontSize: 12,
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase',
                     fontWeight: 600,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
                   }}
                 >
-                  ⚠️ The deadline for this assignment has passed. Submissions are now closed.
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  The deadline for this assignment has passed. Submissions are now closed.
                 </div>
               ) : (
-                /* Student: Submission Form */
+                /* Student: Submission Form (Card-Catalog Intake Slip Style) */
                 <div
                   style={{
                     marginTop: 12,
                     padding: 16,
-                    background: '#ffffff',
-                    borderRadius: 10,
-                    border: '1px solid #e2e8f0',
+                    background: '#FFFFFF',
+                    borderRadius: 8,
+                    border: '1.5px dashed #D2CBB8',
                   }}
                 >
                   <div style={{ marginBottom: 14 }}>
                     <label
                       style={{
                         display: 'block',
-                        fontSize: 12.5,
+                        fontSize: 11,
                         fontWeight: 600,
-                        color: '#334155',
+                        color: '#6B6558',
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
                         marginBottom: 6,
                       }}
                     >
@@ -344,11 +522,13 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                         width: '100%',
                         padding: '10px 12px',
                         boxSizing: 'border-box',
-                        borderRadius: 8,
-                        border: '1px solid #cbd5e1',
+                        borderRadius: 7,
+                        border: '1px solid #E4DFD1',
+                        backgroundColor: '#FAF8F3',
+                        color: '#201F1C',
                         fontSize: 13.5,
                         outline: 'none',
-                        fontFamily: 'inherit',
+                        fontFamily: "'Inter', sans-serif",
                       }}
                     />
                   </div>
@@ -357,9 +537,12 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                     <label
                       style={{
                         display: 'block',
-                        fontSize: 12.5,
+                        fontSize: 11,
                         fontWeight: 600,
-                        color: '#334155',
+                        color: '#6B6558',
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: '0.05em',
+                        textTransform: 'uppercase',
                         marginBottom: 6,
                       }}
                     >
@@ -374,11 +557,13 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                         width: '100%',
                         padding: '9px 12px',
                         boxSizing: 'border-box',
-                        borderRadius: 8,
-                        border: '1px solid #cbd5e1',
+                        borderRadius: 7,
+                        border: '1px solid #E4DFD1',
+                        backgroundColor: '#FAF8F3',
+                        color: '#201F1C',
                         fontSize: 13.5,
                         outline: 'none',
-                        fontFamily: 'inherit',
+                        fontFamily: "'Inter', sans-serif",
                       }}
                     />
                   </div>
@@ -390,17 +575,26 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                     disabled={submitting === a.id}
                     style={{
                       padding: '9px 18px',
-                      backgroundColor: submitting === a.id ? '#cbd5e1' : '#4f46e5',
-                      color: '#ffffff',
+                      backgroundColor: submitting === a.id ? '#E4DFD1' : '#2B4A3E',
+                      color: submitting === a.id ? '#A39C8C' : '#FAF8F3',
                       border: 'none',
-                      borderRadius: 8,
+                      borderRadius: 7,
                       cursor: submitting === a.id ? 'not-allowed' : 'pointer',
                       fontWeight: 600,
-                      fontSize: 13.5,
-                      boxShadow: submitting === a.id ? 'none' : '0 2px 6px rgba(79, 70, 229, 0.2)',
+                      fontSize: 13,
+                      fontFamily: "'Inter', sans-serif",
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
                     }}
                   >
-                    {submitting === a.id ? 'Submitting...' : 'Submit Assignment'}
+                    <span>{submitting === a.id ? 'Submitting...' : 'Submit Assignment'}</span>
+                    {submitting !== a.id && (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
+                    )}
                   </motion.button>
                 </div>
               )}

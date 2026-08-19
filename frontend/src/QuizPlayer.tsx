@@ -77,15 +77,18 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
     }
   };
 
+  // Cycling accent colors for top border rules
+  const cardAccentColors = ['#2B4A3E', '#3D5A73', '#B98A1E', '#B5482F'];
+
   if (loading) {
     return (
       <div
         style={{
-          border: '1px solid #e2e8f0',
-          borderRadius: 16,
+          border: '1.5px dashed #D2CBB8',
+          borderRadius: 10,
           padding: 32,
           marginTop: 24,
-          backgroundColor: '#ffffff',
+          backgroundColor: '#FFFFFF',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -93,18 +96,30 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
           gap: 12,
         }}
       >
+        <style>
+          {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
+        </style>
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
           style={{
-            width: 28,
-            height: 28,
+            width: 24,
+            height: 24,
             borderRadius: '50%',
-            border: '3px solid #e2e8f0',
-            borderTopColor: '#4f46e5',
+            border: '2px solid #E4DFD1',
+            borderTopColor: '#2B4A3E',
           }}
         />
-        <p style={{ margin: 0, color: '#64748b', fontSize: 13.5, fontWeight: 500 }}>
+        <p
+          style={{
+            margin: 0,
+            color: '#6B6558',
+            fontSize: 12,
+            fontFamily: "'IBM Plex Mono', monospace",
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+          }}
+        >
           Loading section quizzes...
         </p>
       </div>
@@ -115,44 +130,93 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
     return (
       <div
         style={{
-          padding: '16px 20px',
+          padding: '20px 24px',
           marginTop: 24,
-          borderRadius: 12,
-          backgroundColor: '#f8fafc',
-          border: '1px dashed #cbd5e1',
-          color: '#64748b',
+          borderRadius: 10,
+          backgroundColor: '#FFFFFF',
+          border: '1.5px dashed #D2CBB8',
+          color: '#6B6558',
           fontSize: 13.5,
+          fontFamily: "'Inter', sans-serif",
           display: 'flex',
           alignItems: 'center',
-          gap: 10,
+          gap: 12,
         }}
       >
-        <span>💡</span> {error || 'No quizzes found for this section.'}
+        <style>
+          {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
+        </style>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#A39C8C"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        <span>{error || 'No quizzes found for this section.'}</span>
       </div>
     );
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24, marginTop: 24 }}>
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
+      </style>
       {quizzes.map((quiz, qIdx) => {
         const quizResult = results[quiz.id];
         const currentAnswers = answers[quiz.id] || {};
         const totalQuestions = quiz.questions?.length || 0;
         const answeredCount = Object.keys(currentAnswers).length;
         const isSubmitDisabled = answeredCount === 0;
+        const accentColor = cardAccentColors[qIdx % cardAccentColors.length];
 
         return (
           <div
             key={quiz.id}
             style={{
-              border: '1px solid #e2e8f0',
-              borderRadius: 16,
+              border: '1px solid #E4DFD1',
+              borderTop: `3px solid ${accentColor}`,
+              borderRadius: 10,
               padding: 28,
-              backgroundColor: '#ffffff',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-              fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+              backgroundColor: '#FFFFFF',
+              position: 'relative',
+              fontFamily: "'Inter', sans-serif",
             }}
           >
+            {/* Library Stamp Badge for Quiz Results */}
+            {quizResult && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '18px',
+                  right: '20px',
+                  transform: 'rotate(28deg)',
+                  backgroundColor: quizResult.passed ? '#E7EEE9' : '#FBEAE3',
+                  color: quizResult.passed ? '#2B4A3E' : '#B5482F',
+                  border: `1.5px solid ${quizResult.passed ? '#2B4A3E' : '#B5482F'}`,
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.08em',
+                  pointerEvents: 'none',
+                  zIndex: 1,
+                }}
+              >
+                {quizResult.passed ? 'PASSED' : 'FAILED'}
+              </div>
+            )}
+
             {/* Header */}
             <div
               style={{
@@ -161,22 +225,31 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
                 alignItems: 'center',
                 marginBottom: 24,
                 paddingBottom: 16,
-                borderBottom: '1px solid #f1f5f9',
+                borderBottom: '1px solid #E4DFD1',
               }}
             >
               <div>
                 <span
                   style={{
                     fontSize: 11,
-                    fontWeight: 700,
-                    color: '#4f46e5',
-                    letterSpacing: '0.6px',
+                    fontWeight: 600,
+                    color: '#A39C8C',
+                    letterSpacing: '0.08em',
                     textTransform: 'uppercase',
+                    fontFamily: "'IBM Plex Mono', monospace",
                   }}
                 >
-                  Knowledge Check #{qIdx + 1}
+                  KNOWLEDGE CHECK #{String(qIdx + 1).padStart(2, '0')}
                 </span>
-                <h3 style={{ margin: '4px 0 0 0', fontSize: 18, fontWeight: 800, color: '#0f172a' }}>
+                <h3
+                  style={{
+                    margin: '4px 0 0 0',
+                    fontSize: 20,
+                    fontWeight: 600,
+                    color: '#201F1C',
+                    fontFamily: "'Fraunces', serif",
+                  }}
+                >
                   {quiz.title}
                 </h3>
               </div>
@@ -184,15 +257,18 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
               {!quizResult && (
                 <span
                   style={{
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: 600,
-                    color: '#64748b',
-                    background: '#f1f5f9',
+                    color: '#6B6558',
+                    background: '#FAF8F3',
+                    border: '1px solid #E4DFD1',
                     padding: '4px 10px',
-                    borderRadius: 20,
+                    borderRadius: 6,
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    letterSpacing: '0.05em',
                   }}
                 >
-                  {answeredCount}/{totalQuestions} Answered
+                  {answeredCount}/{totalQuestions} ANSWERED
                 </span>
               )}
             </div>
@@ -206,9 +282,9 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
                   exit={{ opacity: 0 }}
                   style={{
                     padding: 24,
-                    borderRadius: 14,
-                    backgroundColor: quizResult.passed ? '#f0fdf4' : '#fef2f2',
-                    border: `1px solid ${quizResult.passed ? '#bbf7d0' : '#fecaca'}`,
+                    borderRadius: 8,
+                    backgroundColor: quizResult.passed ? '#E7EEE9' : '#FBEAE3',
+                    border: `1px solid ${quizResult.passed ? '#2B4A3E' : '#B5482F'}`,
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -217,32 +293,51 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
                         style={{
                           margin: 0,
                           fontSize: 18,
-                          fontWeight: 800,
-                          color: quizResult.passed ? '#15803d' : '#991b1b',
+                          fontWeight: 600,
+                          fontFamily: "'Fraunces', serif",
+                          color: quizResult.passed ? '#2B4A3E' : '#B5482F',
                           display: 'flex',
                           alignItems: 'center',
                           gap: 8,
                         }}
                       >
-                        {quizResult.passed ? '🎉 Quiz Passed!' : '❌ Quiz Not Passed'}
+                        {quizResult.passed ? 'Assessment Passed' : 'Assessment Unsatisfactory'}
                       </h4>
-                      <p style={{ margin: '4px 0 0 0', fontSize: 13.5, color: quizResult.passed ? '#166534' : '#991b1b' }}>
+                      <p style={{ margin: '4px 0 0 0', fontSize: 13.5, color: quizResult.passed ? '#2B4A3E' : '#B5482F' }}>
                         {quizResult.passed
-                          ? 'Great job! You have demonstrated a solid understanding.'
-                          : 'Review the material again and retry.'}
+                          ? 'You have demonstrated a solid understanding of this subject.'
+                          : 'Review the section material and re-attempt the assessment.'}
                       </p>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 16, marginTop: 16, marginBottom: 20 }}>
-                    <div style={{ background: '#ffffff', padding: '12px 20px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.06)' }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Final Score</div>
-                      <div style={{ fontSize: 24, fontWeight: 800, color: quizResult.passed ? '#15803d' : '#dc2626' }}>{quizResult.score}%</div>
+                  {/* Single Report-Card Strip for Results */}
+                  <div
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                      backgroundColor: '#FFFFFF',
+                      border: '1px solid #E4DFD1',
+                      borderRadius: 8,
+                      marginTop: 16,
+                      marginBottom: 20,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div style={{ padding: '12px 16px', borderRight: '1px solid #E4DFD1' }}>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: '#A39C8C', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.05em' }}>
+                        FINAL SCORE
+                      </div>
+                      <div style={{ fontSize: 22, fontWeight: 600, color: quizResult.passed ? '#2B4A3E' : '#B5482F', fontFamily: "'IBM Plex Mono', monospace" }}>
+                        {quizResult.score}%
+                      </div>
                     </div>
-                    <div style={{ background: '#ffffff', padding: '12px 20px', borderRadius: 10, border: '1px solid rgba(0,0,0,0.06)' }}>
-                      <div style={{ fontSize: 11, fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>Correct Answers</div>
-                      <div style={{ fontSize: 24, fontWeight: 800, color: '#0f172a' }}>
-                        {quizResult.correct_count} <span style={{ fontSize: 14, color: '#64748b', fontWeight: 500 }}>/ {quizResult.total}</span>
+                    <div style={{ padding: '12px 16px' }}>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: '#A39C8C', textTransform: 'uppercase', fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.05em' }}>
+                        CORRECT ANSWERS
+                      </div>
+                      <div style={{ fontSize: 22, fontWeight: 600, color: '#201F1C', fontFamily: "'IBM Plex Mono', monospace" }}>
+                        {quizResult.correct_count} <span style={{ fontSize: 13, color: '#A39C8C', fontWeight: 400 }}>/ {quizResult.total}</span>
                       </div>
                     </div>
                   </div>
@@ -258,17 +353,25 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
                       });
                     }}
                     style={{
-                      padding: '10px 20px',
-                      backgroundColor: quizResult.passed ? '#166534' : '#dc2626',
-                      color: '#ffffff',
+                      padding: '9px 18px',
+                      backgroundColor: quizResult.passed ? '#2B4A3E' : '#B5482F',
+                      color: '#FAF8F3',
                       border: 'none',
-                      borderRadius: 8,
+                      borderRadius: 7,
                       fontWeight: 600,
-                      fontSize: 13.5,
+                      fontSize: 13,
+                      fontFamily: "'Inter', sans-serif",
                       cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 6,
                     }}
                   >
-                    Retake Quiz
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21.5 2v6h-6" />
+                      <path d="M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                    </svg>
+                    Retake Assessment
                   </motion.button>
                 </motion.div>
               ) : (
@@ -276,8 +379,11 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                     {quiz.questions?.map((q, idx) => (
                       <div key={q.id} style={{ textAlign: 'left' }}>
-                        <p style={{ margin: '0 0 12px 0', fontSize: 14.5, fontWeight: 700, color: '#1e293b' }}>
-                          <span style={{ color: '#4f46e5', marginRight: 6 }}>Q{idx + 1}.</span> {q.question}
+                        <p style={{ margin: '0 0 12px 0', fontSize: 14.5, fontWeight: 600, color: '#201F1C' }}>
+                          <span style={{ color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", marginRight: 6 }}>
+                            Q{String(idx + 1).padStart(2, '0')}.
+                          </span>
+                          {q.question}
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                           {q.options?.map((opt) => {
@@ -291,9 +397,9 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
                                   alignItems: 'center',
                                   gap: 12,
                                   padding: '12px 16px',
-                                  borderRadius: 10,
-                                  border: isSelected ? '1.5px solid #4f46e5' : '1px solid #e2e8f0',
-                                  backgroundColor: isSelected ? '#f5f3ff' : '#ffffff',
+                                  borderRadius: 7,
+                                  border: isSelected ? '1.5px solid #2B4A3E' : '1px solid #E4DFD1',
+                                  backgroundColor: isSelected ? '#E7EEE9' : '#FFFFFF',
                                   cursor: 'pointer',
                                   transition: 'all 0.15s ease',
                                   userSelect: 'none',
@@ -305,9 +411,15 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
                                   value={opt.id}
                                   checked={isSelected}
                                   onChange={() => handleOptionSelect(quiz.id, q.id, opt.id)}
-                                  style={{ accentColor: '#4f46e5', width: 16, height: 16, cursor: 'pointer' }}
+                                  style={{ accentColor: '#2B4A3E', width: 16, height: 16, cursor: 'pointer' }}
                                 />
-                                <span style={{ fontSize: 13.5, fontWeight: isSelected ? 600 : 400, color: isSelected ? '#3730a3' : '#334155' }}>
+                                <span
+                                  style={{
+                                    fontSize: 13.5,
+                                    fontWeight: isSelected ? 600 : 400,
+                                    color: isSelected ? '#2B4A3E' : '#201F1C',
+                                  }}
+                                >
                                   {opt.option_text}
                                 </span>
                               </label>
@@ -318,25 +430,32 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ sectionId }) => {
                     ))}
                   </div>
 
-                  <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'flex-end' }}>
+                  <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid #E4DFD1', display: 'flex', justifyContent: 'flex-end' }}>
                     <motion.button
                       whileHover={!isSubmitDisabled ? { scale: 1.01 } : {}}
                       whileTap={!isSubmitDisabled ? { scale: 0.99 } : {}}
                       onClick={() => handleSubmit(quiz.id)}
                       disabled={isSubmitDisabled}
                       style={{
-                        padding: '11px 24px',
-                        backgroundColor: isSubmitDisabled ? '#cbd5e1' : '#4f46e5',
-                        color: '#ffffff',
+                        padding: '10px 20px',
+                        backgroundColor: isSubmitDisabled ? '#E4DFD1' : '#2B4A3E',
+                        color: isSubmitDisabled ? '#A39C8C' : '#FAF8F3',
                         border: 'none',
-                        borderRadius: 10,
+                        borderRadius: 7,
                         fontWeight: 600,
-                        fontSize: 14,
+                        fontSize: 13.5,
+                        fontFamily: "'Inter', sans-serif",
                         cursor: isSubmitDisabled ? 'not-allowed' : 'pointer',
-                        boxShadow: isSubmitDisabled ? 'none' : '0 2px 8px rgba(79, 70, 229, 0.25)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
                       }}
                     >
-                      Submit Quiz
+                      <span>Submit Answers</span>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
                     </motion.button>
                   </div>
                 </motion.div>

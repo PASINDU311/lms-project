@@ -30,6 +30,87 @@ interface AdminStats {
   pending_submissions: number;
 }
 
+/* ---------------------------------------------------------------------- *
+ * Design tokens
+ * A "ledger" identity: warm paper background, deep-forest ink as the
+ * primary accent, a brick red reserved for things that need attention,
+ * and marigold used sparingly like a highlighter. Fraunces carries
+ * headings, Inter carries body copy, and IBM Plex Mono renders every
+ * number — like figures entered by hand in a gradebook.
+ * ---------------------------------------------------------------------- */
+const T = {
+  paper: '#FAF8F3',
+  surface: '#FFFFFF',
+  ink: '#201F1C',
+  inkSoft: '#6B6558',
+  inkFaint: '#A39C8C',
+  line: '#E4DFD1',
+  lineStrong: '#D2CBB8',
+  forest: '#2B4A3E',
+  forestSoft: '#E7EEE9',
+  brick: '#B5482F',
+  brickSoft: '#FBEAE3',
+  marigold: '#B98A1E',
+  marigoldSoft: '#FBF1DA',
+  slate: '#3D5A73',
+  slateSoft: '#E9EFF3',
+  display: "'Fraunces', Georgia, 'Times New Roman', serif",
+  body: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  mono: "'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace",
+};
+
+const FontLoader = () => (
+  <style>{`
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+  `}</style>
+);
+
+const Icon = {
+  Bell: () => (
+    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+    </svg>
+  ),
+  Students: () => (
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+    </svg>
+  ),
+  Book: () => (
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+    </svg>
+  ),
+  Ledger: () => (
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h10" />
+    </svg>
+  ),
+  Flag: () => (
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.6">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+  Door: () => (
+    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.8">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 21V3h9v18M9 3L4 4v17l5-1M13 12v.01" />
+    </svg>
+  ),
+  Plus: () => (
+    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.2">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  ),
+  Pencil: () => (
+    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.7">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+    </svg>
+  ),
+};
+
 const Dashboard: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
@@ -93,7 +174,7 @@ const Dashboard: React.FC = () => {
         const enrolledIds = enrollments.map((e: any) => e.course_id);
         setEnrolledCourseIds(enrolledIds);
       } catch (e) {
-        console.error("Could not fetch user enrollments", e);
+        console.error('Could not fetch user enrollments', e);
       }
 
       // 4. Fetch Analytics if Admin / Instructor
@@ -157,24 +238,25 @@ const Dashboard: React.FC = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f8fafc',
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+          background: T.paper,
+          fontFamily: T.body,
         }}
       >
+        <FontLoader />
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
+          transition={{ repeat: Infinity, duration: 1.1, ease: 'linear' }}
           style={{
-            width: 44,
-            height: 44,
+            width: 30,
+            height: 30,
             borderRadius: '50%',
-            border: '3px solid #e2e8f0',
-            borderTopColor: '#4f46e5',
-            marginBottom: 16,
+            border: `2.5px solid ${T.line}`,
+            borderTopColor: T.forest,
+            marginBottom: 18,
           }}
         />
-        <p style={{ color: '#64748b', fontSize: 14, fontWeight: 500 }}>
-          Loading your dashboard...
+        <p style={{ color: T.inkSoft, fontSize: 13, fontFamily: T.mono, letterSpacing: '0.03em' }}>
+          opening the gradebook…
         </p>
       </div>
     );
@@ -184,95 +266,29 @@ const Dashboard: React.FC = () => {
 
   const statCards = isStaff && adminStats
     ? [
-        {
-          label: 'TOTAL STUDENTS',
-          value: adminStats.total_students.toLocaleString(),
-          subtext: '↗ +12% this month',
-          subColor: '#16a34a',
-          iconBg: '#f1f5f9',
-          icon: (
-            <svg width="22" height="22" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-            </svg>
-          )
-        },
-        {
-          label: 'TOTAL COURSES',
-          value: adminStats.total_courses,
-          subtext: '✓ Active this semester',
-          subColor: '#64748b',
-          iconBg: '#f1f5f9',
-          icon: (
-            <svg width="22" height="22" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-            </svg>
-          )
-        },
-        {
-          label: 'NEW ENROLLMENTS',
-          value: adminStats.total_enrollments,
-          subtext: '↗ +5% this week',
-          subColor: '#16a34a',
-          iconBg: '#f1f5f9',
-          icon: (
-            <svg width="22" height="22" fill="none" stroke="#94a3b8" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
-            </svg>
-          )
-        },
-        {
-          label: 'PENDING REVIEWS',
-          value: adminStats.pending_submissions,
-          subtext: '⚠ Requires attention',
-          subColor: '#dc2626',
-          iconBg: '#fef2f2',
-          icon: (
-            <svg width="22" height="22" fill="none" stroke="#ef4444" viewBox="0 0 24 24" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          )
-        },
+        { label: 'STUDENTS ON ROLL', value: adminStats.total_students.toLocaleString(), note: '+12% this month', tone: T.forest, icon: <Icon.Students /> },
+        { label: 'COURSES LISTED', value: String(adminStats.total_courses), note: 'active this term', tone: T.slate, icon: <Icon.Book /> },
+        { label: 'NEW ENROLLMENTS', value: String(adminStats.total_enrollments), note: '+5% this week', tone: T.forest, icon: <Icon.Ledger /> },
+        { label: 'PENDING REVIEW', value: String(adminStats.pending_submissions), note: 'needs a look', tone: T.brick, icon: <Icon.Flag /> },
       ]
     : [
-        {
-          label: 'AVAILABLE COURSES',
-          value: courses.length,
-          subtext: 'Ready to learn',
-          subColor: '#64748b',
-          iconBg: '#f1f5f9',
-          icon: '📚'
-        },
-        {
-          label: 'MY ENROLLED COURSES',
-          value: enrolledCourseIds.length,
-          subtext: 'Currently Enrolled',
-          subColor: '#16a34a',
-          iconBg: '#f1f5f9',
-          icon: '🚀'
-        },
+        { label: 'OPEN COURSES', value: String(courses.length), note: 'ready to start', tone: T.slate, icon: <Icon.Book /> },
+        { label: 'YOUR ENROLLMENTS', value: String(enrolledCourseIds.length), note: 'in progress', tone: T.forest, icon: <Icon.Ledger /> },
       ];
 
-  const courseGradients = [
-    'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
-    'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-    'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)',
-    'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
-  ];
+  // Signature detail: each course card gets a hairline "rule" color and a
+  // rotated stamp in the corner, like a due-date stamp on a library card.
+  const ruleColors = [T.forest, T.brick, T.marigold, T.slate];
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background: '#f8fafc',
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        color: '#0f172a',
-      }}
-    >
+    <div style={{ minHeight: '100vh', background: T.paper, fontFamily: T.body, color: T.ink }}>
+      <FontLoader />
+
       {/* Navbar */}
       <header
         style={{
-          background: '#ffffff',
-          borderBottom: '1px solid #e2e8f0',
+          background: T.paper,
+          borderBottom: `1px solid ${T.line}`,
           position: 'sticky',
           top: 0,
           zIndex: 30,
@@ -280,51 +296,61 @@ const Dashboard: React.FC = () => {
       >
         <div
           style={{
-            maxWidth: 1280,
+            maxWidth: 1240,
             margin: '0 auto',
             padding: '0 24px',
-            height: 70,
+            height: 68,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
           }}
         >
           {/* Logo & Main Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
-              <div
+          <div style={{ display: 'flex', alignItems: 'center', gap: 44 }}>
+            <div
+              style={{ display: 'flex', alignItems: 'baseline', gap: 8, cursor: 'pointer' }}
+              onClick={() => navigate('/dashboard')}
+            >
+              <span
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: 'linear-gradient(135deg, #4f46e5, #6366f1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#fff',
-                  fontWeight: 800,
-                  fontSize: 18,
+                  fontFamily: T.display,
+                  fontSize: 22,
+                  fontWeight: 600,
+                  color: T.ink,
+                  letterSpacing: '-0.01em',
                 }}
               >
-                🎓
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 800, color: '#334155', letterSpacing: '-0.3px' }}>
-                EduFlow <span style={{ color: '#4f46e5' }}>LMS</span>
+                EduFlow
+              </span>
+              <span
+                style={{
+                  fontFamily: T.mono,
+                  fontSize: 10.5,
+                  fontWeight: 600,
+                  color: T.forest,
+                  background: T.forestSoft,
+                  padding: '2px 6px',
+                  borderRadius: 3,
+                  letterSpacing: '0.06em',
+                }}
+              >
+                LMS
               </span>
             </div>
 
-            <nav style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+            <nav style={{ display: 'flex', gap: 28, alignItems: 'center' }}>
               <a
                 onClick={() => navigate('/dashboard')}
                 style={{
-                  fontSize: 14,
+                  fontSize: 13.5,
                   fontWeight: 600,
-                  color: '#4f46e5',
+                  color: T.ink,
                   textDecoration: 'none',
-                  borderBottom: '2px solid #4f46e5',
+                  borderBottom: `2px solid ${T.forest}`,
                   paddingBottom: 22,
                   marginTop: 22,
                   cursor: 'pointer',
+                  fontFamily: T.body,
                 }}
               >
                 Dashboard
@@ -332,9 +358,9 @@ const Dashboard: React.FC = () => {
               <a
                 onClick={() => navigate('/my-courses')}
                 style={{
-                  fontSize: 14,
+                  fontSize: 13.5,
                   fontWeight: 500,
-                  color: '#64748b',
+                  color: T.inkSoft,
                   textDecoration: 'none',
                   cursor: 'pointer',
                 }}
@@ -345,26 +371,26 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Right Controls */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             {isStaff && (
               <button
                 onClick={() => setShowCourseForm(!showCourseForm)}
                 style={{
-                  background: '#4f46e5',
-                  color: '#fff',
+                  background: T.forest,
+                  color: T.paper,
                   border: 'none',
-                  padding: '9px 18px',
-                  borderRadius: 10,
+                  padding: '9px 16px',
+                  borderRadius: 7,
                   fontWeight: 600,
-                  fontSize: 13.5,
+                  fontSize: 13,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 8,
+                  gap: 7,
                   cursor: 'pointer',
-                  boxShadow: '0 2px 6px rgba(79, 70, 229, 0.25)',
+                  fontFamily: T.body,
                 }}
               >
-                <span style={{ fontSize: 16, lineHeight: 1 }}>+</span> Create Course
+                <Icon.Plus /> New Course
               </button>
             )}
 
@@ -374,32 +400,34 @@ const Dashboard: React.FC = () => {
                 onClick={() => setShowNotifications(!showNotifications)}
                 style={{
                   background: 'none',
-                  border: 'none',
-                  color: '#64748b',
+                  border: `1px solid ${T.line}`,
+                  color: T.inkSoft,
                   cursor: 'pointer',
-                  padding: 6,
+                  padding: 8,
                   borderRadius: '50%',
                   position: 'relative',
-                  fontSize: 18,
+                  display: 'flex',
                 }}
               >
-                🔔
+                <Icon.Bell />
                 {notifications.filter((n) => !n.is_read).length > 0 && (
                   <span
                     style={{
                       position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      background: '#ef4444',
+                      top: -2,
+                      right: -2,
+                      background: T.brick,
                       color: '#fff',
-                      fontSize: 10,
-                      fontWeight: 700,
+                      fontSize: 9.5,
+                      fontFamily: T.mono,
+                      fontWeight: 600,
                       borderRadius: '50%',
-                      width: 16,
-                      height: 16,
+                      width: 15,
+                      height: 15,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
+                      border: `1.5px solid ${T.paper}`,
                     }}
                   >
                     {notifications.filter((n) => !n.is_read).length}
@@ -412,30 +440,32 @@ const Dashboard: React.FC = () => {
                   style={{
                     position: 'absolute',
                     right: 0,
-                    top: 40,
+                    top: 44,
                     width: 320,
-                    background: '#ffffff',
-                    borderRadius: 12,
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
-                    border: '1px solid #e2e8f0',
+                    background: T.surface,
+                    borderRadius: 10,
+                    boxShadow: '0 12px 28px -8px rgba(32,31,28,0.18)',
+                    border: `1px solid ${T.line}`,
                     zIndex: 50,
                     padding: 16,
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                    <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Notifications</h4>
+                    <h4 style={{ margin: 0, fontSize: 13.5, fontWeight: 700, color: T.ink, fontFamily: T.display }}>
+                      Notifications
+                    </h4>
                     <button
                       onClick={handleMarkAllRead}
-                      style={{ background: 'none', border: 'none', color: '#4f46e5', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                      style={{ background: 'none', border: 'none', color: T.forest, fontSize: 11.5, fontWeight: 600, cursor: 'pointer', fontFamily: T.mono }}
                     >
-                      Mark all as read
+                      mark all read
                     </button>
                   </div>
 
                   <div style={{ maxHeight: 280, overflowY: 'auto' }}>
                     {notifications.length === 0 ? (
-                      <p style={{ fontSize: 13, color: '#94a3b8', margin: 0, padding: '12px 0', textAlign: 'center' }}>
-                        No notifications available
+                      <p style={{ fontSize: 13, color: T.inkFaint, margin: 0, padding: '14px 0', textAlign: 'center' }}>
+                        Nothing here yet.
                       </p>
                     ) : (
                       notifications.map((n) => (
@@ -443,12 +473,12 @@ const Dashboard: React.FC = () => {
                           key={n.id}
                           style={{
                             padding: '10px 0',
-                            borderBottom: '1px solid #f1f5f9',
-                            opacity: n.is_read ? 0.6 : 1,
+                            borderBottom: `1px solid ${T.line}`,
+                            opacity: n.is_read ? 0.55 : 1,
                           }}
                         >
-                          <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>{n.title}</div>
-                          <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{n.message}</div>
+                          <div style={{ fontSize: 13, fontWeight: 600, color: T.ink }}>{n.title}</div>
+                          <div style={{ fontSize: 12, color: T.inkSoft, marginTop: 2 }}>{n.message}</div>
                         </div>
                       ))
                     )}
@@ -462,18 +492,17 @@ const Dashboard: React.FC = () => {
               <div
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 style={{
-                  width: 38,
-                  height: 38,
+                  width: 36,
+                  height: 36,
                   borderRadius: '50%',
-                  background: '#e0e7ff',
-                  color: '#4338ca',
+                  background: T.forest,
+                  color: T.paper,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontWeight: 700,
-                  fontSize: 15,
-                  border: '2px solid #fff',
-                  boxShadow: '0 0 0 2px #e2e8f0',
+                  fontSize: 14,
+                  fontFamily: T.display,
                   cursor: 'pointer',
                 }}
                 title={user?.name}
@@ -487,19 +516,19 @@ const Dashboard: React.FC = () => {
                   style={{
                     position: 'absolute',
                     right: 0,
-                    top: 48,
+                    top: 46,
                     width: 200,
-                    background: '#ffffff',
-                    borderRadius: 12,
-                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
-                    border: '1px solid #e2e8f0',
+                    background: T.surface,
+                    borderRadius: 10,
+                    boxShadow: '0 12px 28px -8px rgba(32,31,28,0.18)',
+                    border: `1px solid ${T.line}`,
                     zIndex: 50,
                     padding: '8px 0',
                   }}
                 >
-                  <div style={{ padding: '8px 16px', borderBottom: '1px solid #f1f5f9' }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{user?.name}</div>
-                    <div style={{ fontSize: 11, color: '#64748b' }}>{user?.email}</div>
+                  <div style={{ padding: '8px 16px', borderBottom: `1px solid ${T.line}` }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: T.ink, fontFamily: T.display }}>{user?.name}</div>
+                    <div style={{ fontSize: 11, color: T.inkSoft }}>{user?.email}</div>
                   </div>
 
                   <button
@@ -510,16 +539,17 @@ const Dashboard: React.FC = () => {
                       padding: '10px 16px',
                       background: 'none',
                       border: 'none',
-                      color: '#ef4444',
+                      color: T.brick,
                       fontSize: 13,
                       fontWeight: 600,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: 8,
+                      gap: 9,
+                      fontFamily: T.body,
                     }}
                   >
-                    🚪 Logout
+                    <Icon.Door /> Sign out
                   </button>
                 </div>
               )}
@@ -528,114 +558,81 @@ const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      <main style={{ maxWidth: 1280, margin: '0 auto', padding: '36px 24px 64px' }}>
+      <main style={{ maxWidth: 1240, margin: '0 auto', padding: '40px 24px 72px' }}>
         {/* Welcome Header */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'flex-start',
-            marginBottom: 32,
-          }}
-        >
-          <div>
+        <div style={{ marginBottom: 36 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
             <h1
               style={{
-                fontSize: 28,
-                fontWeight: 800,
-                letterSpacing: '-0.5px',
-                color: '#0f172a',
-                margin: '0 0 6px 0',
+                fontFamily: T.display,
+                fontSize: 32,
+                fontWeight: 600,
+                letterSpacing: '-0.01em',
+                color: T.ink,
+                margin: 0,
               }}
             >
               Welcome back, {user?.name || 'User'}
             </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 14, color: '#64748b' }}>
-                Here is what's happening with your courses today.
-              </span>
-              <span
-                style={{
-                  background: '#dcfce7',
-                  color: '#15803d',
-                  fontSize: 11,
-                  fontWeight: 700,
-                  padding: '2px 10px',
-                  borderRadius: 999,
-                  textTransform: 'capitalize',
-                }}
-              >
-                {user?.role?.toLowerCase()}
-              </span>
-            </div>
+            <span
+              style={{
+                fontFamily: T.mono,
+                background: T.forestSoft,
+                color: T.forest,
+                fontSize: 10.5,
+                fontWeight: 600,
+                padding: '3px 9px',
+                borderRadius: 4,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+              }}
+            >
+              {user?.role?.toLowerCase()}
+            </span>
           </div>
-
-        
+          <span style={{ fontSize: 14.5, color: T.inkSoft }}>
+            Here's what's on today's page.
+          </span>
         </div>
 
-        {/* Analytics Grid */}
+        {/* Report-card style stat strip */}
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-            gap: 20,
+            gridTemplateColumns: `repeat(${statCards.length}, 1fr)`,
+            border: `1px solid ${T.line}`,
+            borderRadius: 12,
+            background: T.surface,
             marginBottom: 40,
+            overflow: 'hidden',
           }}
         >
-          {statCards.map((card) => (
+          {statCards.map((card, i) => (
             <div
               key={card.label}
               style={{
-                background: '#ffffff',
-                border: '1px solid #e2e8f0',
-                borderRadius: 16,
-                padding: 22,
-                boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
+                padding: '20px 22px',
+                borderLeft: i === 0 ? 'none' : `1px solid ${T.line}`,
               }}
             >
-              <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14, color: card.tone }}>
+                {card.icon}
                 <span
                   style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    color: '#64748b',
-                    letterSpacing: '0.6px',
-                    display: 'block',
-                    marginBottom: 10,
+                    fontFamily: T.mono,
+                    fontSize: 10.5,
+                    fontWeight: 600,
+                    color: T.inkFaint,
+                    letterSpacing: '0.05em',
                   }}
                 >
                   {card.label}
                 </span>
-                <div style={{ fontSize: 32, fontWeight: 800, color: '#0f172a', lineHeight: 1 }}>
-                  {card.value}
-                </div>
-                <div
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: card.subColor,
-                    marginTop: 10,
-                  }}
-                >
-                  {card.subtext}
-                </div>
               </div>
-              <div
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: 12,
-                  background: card.iconBg,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                {card.icon}
+              <div style={{ fontFamily: T.mono, fontSize: 28, fontWeight: 600, color: T.ink, lineHeight: 1 }}>
+                {card.value}
               </div>
+              <div style={{ fontSize: 12, color: T.inkSoft, marginTop: 8 }}>{card.note}</div>
             </div>
           ))}
         </div>
@@ -645,22 +642,21 @@ const Dashboard: React.FC = () => {
           <div
             style={{
               marginBottom: 40,
-              background: '#ffffff',
-              borderRadius: 16,
-              border: '1px solid #e2e8f0',
+              background: T.surface,
+              borderRadius: 12,
+              border: `1px solid ${T.line}`,
               padding: 24,
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
             }}
           >
             {AdminUserManagement ? (
               <AdminUserManagement />
             ) : (
-              <p style={{ color: '#64748b' }}>Admin User Management Module</p>
+              <p style={{ color: T.inkSoft }}>Admin User Management Module</p>
             )}
           </div>
         )}
 
-        {/* Create Course Form */}
+        {/* Create Course Form — styled like a card-catalog intake slip */}
         <AnimatePresence>
           {showCourseForm && (
             <motion.form
@@ -669,22 +665,24 @@ const Dashboard: React.FC = () => {
               exit={{ opacity: 0, height: 0 }}
               onSubmit={handleCreateCourse}
               style={{
-                background: '#ffffff',
+                background: T.surface,
                 padding: 28,
-                borderRadius: 16,
-                border: '1px solid #e2e8f0',
+                borderRadius: 12,
+                border: `1.5px dashed ${T.lineStrong}`,
                 marginBottom: 40,
                 overflow: 'hidden',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
               }}
             >
-              <h3 style={{ margin: '0 0 20px 0', fontSize: 18, fontWeight: 700, color: '#0f172a' }}>
-                Create New Course
+              <h3 style={{ margin: '0 0 4px 0', fontSize: 18, fontWeight: 600, color: T.ink, fontFamily: T.display }}>
+                Add a course to the catalog
               </h3>
+              <p style={{ margin: '0 0 20px 0', fontSize: 12.5, color: T.inkFaint, fontFamily: T.mono }}>
+                new entry
+              </p>
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 16, marginBottom: 16 }}>
                 <div>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 6 }}>
-                    Course Title
+                  <label style={{ fontSize: 12, fontWeight: 600, color: T.inkSoft, display: 'block', marginBottom: 6, fontFamily: T.mono, letterSpacing: '0.03em' }}>
+                    TITLE
                   </label>
                   <input
                     type="text"
@@ -695,17 +693,19 @@ const Dashboard: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '11px 14px',
-                      borderRadius: 8,
-                      border: '1px solid #cbd5e1',
+                      borderRadius: 7,
+                      border: `1px solid ${T.line}`,
                       fontSize: 14,
                       outline: 'none',
                       boxSizing: 'border-box',
+                      fontFamily: T.body,
+                      background: T.paper,
                     }}
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 6 }}>
-                    Price ($)
+                  <label style={{ fontSize: 12, fontWeight: 600, color: T.inkSoft, display: 'block', marginBottom: 6, fontFamily: T.mono, letterSpacing: '0.03em' }}>
+                    PRICE ($)
                   </label>
                   <input
                     type="number"
@@ -715,18 +715,20 @@ const Dashboard: React.FC = () => {
                     style={{
                       width: '100%',
                       padding: '11px 14px',
-                      borderRadius: 8,
-                      border: '1px solid #cbd5e1',
+                      borderRadius: 7,
+                      border: `1px solid ${T.line}`,
                       fontSize: 14,
                       outline: 'none',
                       boxSizing: 'border-box',
+                      fontFamily: T.mono,
+                      background: T.paper,
                     }}
                   />
                 </div>
               </div>
               <div style={{ marginBottom: 20 }}>
-                <label style={{ fontSize: 13, fontWeight: 600, color: '#475569', display: 'block', marginBottom: 6 }}>
-                  Course Description
+                <label style={{ fontSize: 12, fontWeight: 600, color: T.inkSoft, display: 'block', marginBottom: 6, fontFamily: T.mono, letterSpacing: '0.03em' }}>
+                  DESCRIPTION
                 </label>
                 <textarea
                   placeholder="Deep dive into neural networks, SVMs, and unsupervised learning..."
@@ -737,12 +739,14 @@ const Dashboard: React.FC = () => {
                   style={{
                     width: '100%',
                     padding: '11px 14px',
-                    borderRadius: 8,
-                    border: '1px solid #cbd5e1',
+                    borderRadius: 7,
+                    border: `1px solid ${T.line}`,
                     fontSize: 14,
                     outline: 'none',
                     boxSizing: 'border-box',
                     resize: 'vertical',
+                    fontFamily: T.body,
+                    background: T.paper,
                   }}
                 />
               </div>
@@ -750,31 +754,35 @@ const Dashboard: React.FC = () => {
                 <button
                   type="submit"
                   style={{
-                    background: '#4f46e5',
-                    color: '#fff',
+                    background: T.forest,
+                    color: T.paper,
                     border: 'none',
-                    padding: '10px 24px',
-                    borderRadius: 8,
+                    padding: '10px 22px',
+                    borderRadius: 7,
                     fontWeight: 600,
+                    fontSize: 13.5,
                     cursor: 'pointer',
+                    fontFamily: T.body,
                   }}
                 >
-                  Save Course
+                  Add to catalog
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowCourseForm(false)}
                   style={{
-                    background: '#f1f5f9',
-                    color: '#475569',
-                    border: 'none',
+                    background: 'none',
+                    color: T.inkSoft,
+                    border: `1px solid ${T.line}`,
                     padding: '10px 20px',
-                    borderRadius: 8,
+                    borderRadius: 7,
                     fontWeight: 600,
+                    fontSize: 13.5,
                     cursor: 'pointer',
+                    fontFamily: T.body,
                   }}
                 >
-                  Cancel
+                  Discard
                 </button>
               </div>
             </motion.form>
@@ -782,137 +790,159 @@ const Dashboard: React.FC = () => {
         </AnimatePresence>
 
         {/* Active Courses */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', margin: 0 }}>
-            Active Courses
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 20 }}>
+          <h2 style={{ fontSize: 20, fontWeight: 600, color: T.ink, margin: 0, fontFamily: T.display }}>
+            Course Catalog
           </h2>
+          <span style={{ fontSize: 12, color: T.inkFaint, fontFamily: T.mono }}>
+            {courses.length} {courses.length === 1 ? 'entry' : 'entries'}
+          </span>
         </div>
 
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-            gap: 24,
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 20,
           }}
         >
           {courses.map((course, idx) => {
-            const bgGradient = courseGradients[idx % courseGradients.length];
+            const rule = ruleColors[idx % ruleColors.length];
             const isEnrolled = enrolledCourseIds.includes(course.id);
+            const pct = Math.min(45 + idx * 20, 85);
+            const stampText = isEnrolled ? 'ENROLLED' : isStaff ? 'INSTRUCTOR' : 'OPEN';
+            const stampTone = isEnrolled ? T.forest : isStaff ? T.slate : T.marigold;
 
             return (
               <div
                 key={course.id}
                 style={{
-                  background: '#ffffff',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: 16,
+                  position: 'relative',
+                  background: T.surface,
+                  border: `1px solid ${T.line}`,
+                  borderTop: `3px solid ${rule}`,
+                  borderRadius: 10,
                   overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column',
                   justifyContent: 'space-between',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
                 }}
               >
-                <div>
-                  <div
-                    style={{
-                      height: 120,
-                      background: bgGradient,
-                      padding: 16,
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                      boxSizing: 'border-box',
-                    }}
-                  >
+                {/* corner stamp */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 16,
+                    right: -30,
+                    transform: 'rotate(28deg)',
+                    border: `1.5px solid ${stampTone}`,
+                    color: stampTone,
+                    fontFamily: T.mono,
+                    fontSize: 9.5,
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    padding: '3px 34px',
+                    borderRadius: 3,
+                    opacity: 0.85,
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {stampText}
+                </div>
+
+                <div style={{ padding: '22px 20px 0 20px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14, paddingRight: 40 }}>
                     <span
                       style={{
-                        background: 'rgba(255, 255, 255, 0.9)',
-                        color: '#0f172a',
-                        fontSize: 12,
+                        fontFamily: T.mono,
+                        fontSize: 10.5,
                         fontWeight: 600,
-                        padding: '4px 12px',
-                        borderRadius: 6,
+                        color: T.inkFaint,
+                        letterSpacing: '0.05em',
                       }}
                     >
-                      {course.price === 0 ? 'Beginner' : 'Advanced'}
-                    </span>
-                    <span
-                      style={{
-                        color: '#ffffff',
-                        fontWeight: 800,
-                        fontSize: 15,
-                      }}
-                    >
-                      {course.price === 0 ? 'Free' : `$${course.price}`}
+                      {course.price === 0 ? 'FREE ACCESS' : 'PAID COURSE'}
                     </span>
                   </div>
 
-                  <div style={{ padding: 20 }}>
-                    <h3
-                      style={{
-                        fontSize: 16,
-                        fontWeight: 700,
-                        color: '#0f172a',
-                        margin: '0 0 8px 0',
-                        lineHeight: 1.3,
-                      }}
-                    >
-                      {course.title}
-                    </h3>
-                    <p
-                      style={{
-                        fontSize: 13,
-                        color: '#64748b',
-                        margin: '0 0 20px 0',
-                        lineHeight: 1.5,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden',
-                      }}
-                    >
-                      {course.description}
-                    </p>
+                  <h3
+                    style={{
+                      fontFamily: T.display,
+                      fontSize: 18,
+                      fontWeight: 600,
+                      color: T.ink,
+                      margin: '0 0 8px 0',
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {course.title}
+                  </h3>
+                  <p
+                    style={{
+                      fontSize: 13,
+                      color: T.inkSoft,
+                      margin: '0 0 18px 0',
+                      lineHeight: 1.55,
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    {course.description}
+                  </p>
 
-                    <div style={{ marginBottom: 20 }}>
-                      <div style={{ height: 6, width: '100%', background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
-                        <div
-                          style={{
-                            height: '100%',
-                            width: `${Math.min(45 + idx * 20, 85)}%`,
-                            background: '#4f46e5',
-                            borderRadius: 999,
-                          }}
-                        />
-                      </div>
-                      <div style={{ fontSize: 11, color: '#94a3b8', textAlign: 'right', marginTop: 6, fontWeight: 500 }}>
-                        {Math.min(45 + idx * 20, 85)}% Capacity
-                      </div>
+                  <div style={{ marginBottom: 18 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <span style={{ fontFamily: T.mono, fontSize: 10.5, color: T.inkFaint, letterSpacing: '0.04em' }}>
+                        SEATS FILLED
+                      </span>
+                      <span style={{ fontFamily: T.mono, fontSize: 10.5, color: T.inkSoft, fontWeight: 600 }}>
+                        {pct}%
+                      </span>
+                    </div>
+                    <div style={{ height: 3, width: '100%', background: T.line, borderRadius: 999 }}>
+                      <div style={{ height: '100%', width: `${pct}%`, background: rule, borderRadius: 999 }} />
                     </div>
                   </div>
                 </div>
 
                 <div
                   style={{
-                    padding: '0 20px 20px 20px',
+                    padding: '14px 20px 20px 20px',
+                    borderTop: `1px solid ${T.line}`,
+                    marginTop: 6,
                     display: 'flex',
+                    alignItems: 'center',
                     gap: 10,
                   }}
                 >
+                  <span
+                    style={{
+                      fontFamily: T.mono,
+                      fontSize: 15,
+                      fontWeight: 600,
+                      color: T.ink,
+                      minWidth: 46,
+                    }}
+                  >
+                    {course.price === 0 ? '—' : `$${course.price}`}
+                  </span>
+
                   {isEnrolled || isStaff ? (
                     <button
                       onClick={() => navigate(`/learn/${course.id}`)}
                       style={{
                         flex: 1,
-                        background: '#4f46e5',
-                        color: '#ffffff',
+                        background: T.forest,
+                        color: T.paper,
                         border: 'none',
-                        padding: '10px',
-                        borderRadius: 10,
+                        padding: '9px',
+                        borderRadius: 7,
                         fontWeight: 600,
-                        fontSize: 13.5,
+                        fontSize: 13,
                         cursor: 'pointer',
+                        fontFamily: T.body,
                       }}
                     >
                       View Course
@@ -923,18 +953,19 @@ const Dashboard: React.FC = () => {
                       disabled={enrollingId === course.id}
                       style={{
                         flex: 1,
-                        background: '#10b981',
-                        color: '#ffffff',
-                        border: 'none',
-                        padding: '10px',
-                        borderRadius: 10,
+                        background: 'none',
+                        border: `1.5px solid ${T.forest}`,
+                        color: T.forest,
+                        padding: '9px',
+                        borderRadius: 7,
                         fontWeight: 600,
-                        fontSize: 13.5,
+                        fontSize: 13,
                         cursor: 'pointer',
-                        opacity: enrollingId === course.id ? 0.7 : 1,
+                        opacity: enrollingId === course.id ? 0.6 : 1,
+                        fontFamily: T.body,
                       }}
                     >
-                      {enrollingId === course.id ? 'Enrolling...' : 'Enroll Now'}
+                      {enrollingId === course.id ? 'Enrolling…' : 'Enroll Now'}
                     </button>
                   )}
 
@@ -942,19 +973,21 @@ const Dashboard: React.FC = () => {
                     <button
                       onClick={() => navigate(`/builder/${course.id}`)}
                       style={{
-                        background: '#ffffff',
-                        border: '1px solid #cbd5e1',
-                        color: '#475569',
-                        width: 40,
-                        borderRadius: 10,
+                        background: 'none',
+                        border: `1px solid ${T.line}`,
+                        color: T.inkSoft,
+                        width: 36,
+                        height: 36,
+                        borderRadius: 7,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
+                        flexShrink: 0,
                       }}
                       title="Edit Course Builder"
                     >
-                      ✏️
+                      <Icon.Pencil />
                     </button>
                   )}
                 </div>
@@ -967,53 +1000,50 @@ const Dashboard: React.FC = () => {
             <div
               onClick={() => setShowCourseForm(true)}
               style={{
-                border: '2px dashed #cbd5e1',
-                borderRadius: 16,
-                minHeight: 340,
+                border: `1.5px dashed ${T.lineStrong}`,
+                borderRadius: 10,
+                minHeight: 300,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 justifyContent: 'center',
                 padding: 24,
                 cursor: 'pointer',
-                background: '#f8fafc',
+                background: 'transparent',
               }}
             >
               <div
                 style={{
-                  width: 48,
-                  height: 48,
+                  width: 44,
+                  height: 44,
                   borderRadius: '50%',
-                  background: '#e0e7ff',
-                  color: '#4f46e5',
+                  border: `1.5px solid ${T.forest}`,
+                  color: T.forest,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 22,
                   marginBottom: 16,
                 }}
               >
-                +
+                <Icon.Plus />
               </div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>
-                Create New Course
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: T.ink, margin: '0 0 6px 0', fontFamily: T.display }}>
+                Add a new entry
               </h3>
-              <p style={{ fontSize: 13, color: '#64748b', textAlign: 'center', margin: '0 0 20px 0', maxWidth: 200 }}>
-                Launch a new module, syllabus, or full curriculum.
+              <p style={{ fontSize: 12.5, color: T.inkSoft, textAlign: 'center', margin: '0 0 18px 0', maxWidth: 200 }}>
+                Start a module, syllabus, or full curriculum.
               </p>
-              <button
+              <span
                 style={{
-                  background: '#4f46e5',
-                  color: '#fff',
-                  border: 'none',
-                  padding: '9px 20px',
-                  borderRadius: 8,
+                  fontFamily: T.mono,
+                  fontSize: 11,
+                  color: T.forest,
                   fontWeight: 600,
-                  fontSize: 13,
+                  letterSpacing: '0.04em',
                 }}
               >
-                Builder
-              </button>
+                OPEN BUILDER
+              </span>
             </div>
           )}
         </div>
@@ -1022,12 +1052,18 @@ const Dashboard: React.FC = () => {
           <div
             style={{
               textAlign: 'center',
-              padding: '60px 20px',
-              color: '#94a3b8',
-              fontSize: 14,
+              padding: '64px 20px',
+              border: `1.5px dashed ${T.lineStrong}`,
+              borderRadius: 12,
+              color: T.inkFaint,
             }}
           >
-            No courses available yet.
+            <p style={{ fontFamily: T.display, fontSize: 16, color: T.inkSoft, margin: '0 0 4px 0' }}>
+              The catalog is empty.
+            </p>
+            <p style={{ fontSize: 12.5, margin: 0, fontFamily: T.mono }}>
+              check back once courses are listed
+            </p>
           </div>
         )}
       </main>
