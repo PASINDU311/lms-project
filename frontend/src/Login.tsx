@@ -10,8 +10,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     try {
       const res = await API.post('/auth/login', { email, password });
-      
-      // Tab isolation සඳහා sessionStorage භාවිත කිරීම
+
       sessionStorage.setItem('token', res.data.token);
       sessionStorage.setItem('role', res.data.user.role);
       sessionStorage.setItem('userName', res.data.user.name);

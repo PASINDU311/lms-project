@@ -13,7 +13,7 @@ const Register: React.FC = () => {
     try {
       await API.post('/auth/register', { name, email, password, role });
       alert('Registration Successful! Please login.');
-      window.location.href = '/';
+      window.location.href = '/login'; // 👈 Register වුණාට පස්සේ Login එකට යවනවා
     } catch (err: any) {
       setError(err.response?.data?.error || 'Registration failed');
     }
@@ -66,7 +66,7 @@ const Register: React.FC = () => {
         </button>
       </form>
       <p style={{ marginTop: '15px', textAlign: 'center' }}>
-        Already have an account? <a href="/">Login here</a>
+        Already have an account? <a href="/login">Login here</a>
       </p>
     </div>
   );

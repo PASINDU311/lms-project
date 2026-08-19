@@ -38,9 +38,10 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [enrollingId, setEnrollingId] = useState<number | null>(null);
 
-  // Notification States
+  // Notification & User Menu States
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   // New Course Form State
   const [showCourseForm, setShowCourseForm] = useState(false);
@@ -75,40 +76,38 @@ const Dashboard: React.FC = () => {
   };
 
   const fetchProfileAndData = async () => {
-  try {
-    // 1. Fetch Logged-in User Profile
-    const profileRes = await API.get('/profile');
-    const currentUser: UserProfile = profileRes.data.user;
-    setUser(currentUser);
-
-    // 2. Fetch All Courses
-    const courseRes = await API.get('/courses');
-    setCourses(courseRes.data.courses || []);
-
-    // 3. Fetch Enrolled Courses for Current User (/my-courses හරියාකාරව Call කිරීම)
     try {
-      const myCoursesRes = await API.get('/my-courses');
-      const enrollments = myCoursesRes.data.enrollments || [];
-      
-      // enrollments array එකෙන් course_id ටික විතරක් ගෙන එකතු කිරීම
-      const enrolledIds = enrollments.map((e: any) => e.course_id);
-      setEnrolledCourseIds(enrolledIds);
-    } catch (e) {
-      console.error("Could not fetch user enrollments", e);
-    }
+      // 1. Fetch Logged-in User Profile
+      const profileRes = await API.get('/profile');
+      const currentUser: UserProfile = profileRes.data.user;
+      setUser(currentUser);
 
-    // 4. Fetch Analytics if Admin / Instructor
-    if (currentUser.role === 'ADMIN' || currentUser.role === 'INSTRUCTOR') {
-      const statsRes = await API.get('/analytics/admin');
-      setAdminStats(statsRes.data.stats);
-    }
+      // 2. Fetch All Courses
+      const courseRes = await API.get('/courses');
+      setCourses(courseRes.data.courses || []);
 
-    setLoading(false);
-  } catch (err) {
-    console.error('Failed to load dashboard data:', err);
-    setLoading(false);
-  }
-};
+      // 3. Fetch Enrolled Courses for Current User
+      try {
+        const myCoursesRes = await API.get('/my-courses');
+        const enrollments = myCoursesRes.data.enrollments || [];
+        const enrolledIds = enrollments.map((e: any) => e.course_id);
+        setEnrolledCourseIds(enrolledIds);
+      } catch (e) {
+        console.error("Could not fetch user enrollments", e);
+      }
+
+      // 4. Fetch Analytics if Admin / Instructor
+      if (currentUser.role === 'ADMIN' || currentUser.role === 'INSTRUCTOR') {
+        const statsRes = await API.get('/analytics/admin');
+        setAdminStats(statsRes.data.stats);
+      }
+
+      setLoading(false);
+    } catch (err) {
+      console.error('Failed to load dashboard data:', err);
+      setLoading(false);
+    }
+  };
 
   const handleEnroll = async (course: Course) => {
     setEnrollingId(course.id);
@@ -118,7 +117,6 @@ const Dashboard: React.FC = () => {
         amount: course.price,
       });
       alert(`Successfully Enrolled in ${course.title}!`);
-      // Reload dashboard data so enrolled status updates immediately
       fetchProfileAndData();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Enrollment failed');
@@ -145,6 +143,8 @@ const Dashboard: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
+    sessionStorage.removeItem('role');
+    sessionStorage.removeItem('userName');
     window.location.href = '/';
   };
 
@@ -182,7 +182,6 @@ const Dashboard: React.FC = () => {
 
   const isStaff = user?.role === 'ADMIN' || user?.role === 'INSTRUCTOR';
 
-  // Stats Card Data
   const statCards = isStaff && adminStats
     ? [
         {
@@ -292,7 +291,7 @@ const Dashboard: React.FC = () => {
         >
           {/* Logo & Main Nav */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 40 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>
               <div
                 style={{
                   width: 32,
@@ -316,7 +315,7 @@ const Dashboard: React.FC = () => {
 
             <nav style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
               <a
-                href="#dashboard"
+                onClick={() => navigate('/dashboard')}
                 style={{
                   fontSize: 14,
                   fontWeight: 600,
@@ -325,6 +324,7 @@ const Dashboard: React.FC = () => {
                   borderBottom: '2px solid #4f46e5',
                   paddingBottom: 22,
                   marginTop: 22,
+                  cursor: 'pointer',
                 }}
               >
                 Dashboard
@@ -340,12 +340,6 @@ const Dashboard: React.FC = () => {
                 }}
               >
                 My Courses
-              </a>
-              <a href="#messages" style={{ fontSize: 14, fontWeight: 500, color: '#64748b', textDecoration: 'none' }}>
-                Messages
-              </a>
-              <a href="#resources" style={{ fontSize: 14, fontWeight: 500, color: '#64748b', textDecoration: 'none' }}>
-                Resources
               </a>
             </nav>
           </div>
@@ -463,37 +457,72 @@ const Dashboard: React.FC = () => {
               )}
             </div>
 
-            <button
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#64748b',
-                cursor: 'pointer',
-                padding: 6,
-                borderRadius: '50%',
-              }}
-            >
-              ⚙️
-            </button>
+            {/* User Avatar + Dropdown Menu (With Logout Button) */}
+            <div style={{ position: 'relative' }}>
+              <div
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                style={{
+                  width: 38,
+                  height: 38,
+                  borderRadius: '50%',
+                  background: '#e0e7ff',
+                  color: '#4338ca',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: 15,
+                  border: '2px solid #fff',
+                  boxShadow: '0 0 0 2px #e2e8f0',
+                  cursor: 'pointer',
+                }}
+                title={user?.name}
+              >
+                {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              </div>
 
-            {/* User Avatar */}
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: '50%',
-                background: '#e0e7ff',
-                color: '#4338ca',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                fontSize: 14,
-                border: '2px solid #fff',
-                boxShadow: '0 0 0 1px #e2e8f0',
-              }}
-            >
-              {user?.name ? user.name.charAt(0).toUpperCase() : 'U'}
+              {/* User Dropdown Menu */}
+              {showUserMenu && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 48,
+                    width: 200,
+                    background: '#ffffff',
+                    borderRadius: 12,
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                    border: '1px solid #e2e8f0',
+                    zIndex: 50,
+                    padding: '8px 0',
+                  }}
+                >
+                  <div style={{ padding: '8px 16px', borderBottom: '1px solid #f1f5f9' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{user?.name}</div>
+                    <div style={{ fontSize: 11, color: '#64748b' }}>{user?.email}</div>
+                  </div>
+
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '10px 16px',
+                      background: 'none',
+                      border: 'none',
+                      color: '#ef4444',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 8,
+                    }}
+                  >
+                    🚪 Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -538,20 +567,6 @@ const Dashboard: React.FC = () => {
               >
                 {user?.role?.toLowerCase()}
               </span>
-              {user?.role === 'ADMIN' && (
-                <span
-                  style={{
-                    background: '#e0e7ff',
-                    color: '#4338ca',
-                    fontSize: 11,
-                    fontWeight: 700,
-                    padding: '2px 10px',
-                    borderRadius: 999,
-                  }}
-                >
-                  Admin
-                </span>
-              )}
             </div>
           </div>
 
@@ -562,7 +577,7 @@ const Dashboard: React.FC = () => {
               border: '1px solid #e2e8f0',
               padding: '9px 16px',
               borderRadius: 10,
-              color: '#475569',
+              color: '#dc2626',
               fontSize: 13.5,
               fontWeight: 600,
               cursor: 'pointer',
@@ -902,7 +917,6 @@ const Dashboard: React.FC = () => {
                     gap: 10,
                   }}
                 >
-                  {/* Conditional Rendering: View Course VS Enroll Now */}
                   {isEnrolled || isStaff ? (
                     <button
                       onClick={() => navigate(`/learn/${course.id}`)}
