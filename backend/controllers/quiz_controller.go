@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 
 	"lms-backend/config"
@@ -9,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Create Quiz with Questions & Options (Instructor/Admin)
+// Create Quiz with Questions & Options (Instructor/Admin) + Automatic Notification
 func CreateQuiz(c *gin.Context) {
 	var input struct {
 		SectionID uint   `json:"section_id" binding:"required"`
@@ -55,7 +56,47 @@ func CreateQuiz(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "Quiz created successfully", "quiz": quiz})
+	// --- 🔔 AUTOMATIC QUIZ NOTIFICATION TRIGGER ---
+	go func(sectionID uint, quizTitle string) {
+		// 1. Get Course ID from Section
+		var section struct {
+			CourseID uint
+		}
+		if err := config.DB.Table("sections").Select("course_id").Where("id = ?", sectionID).Scan(&section).Error; err != nil || section.CourseID == 0 {
+			return
+		}
+
+		// 2. Get Course Title
+		var course struct {
+			Title string
+		}
+		config.DB.Table("courses").Select("title").Where("id = ?", section.CourseID).Scan(&course)
+
+		// 3. Find all Enrolled Students for this Course
+		var enrollments []struct {
+			UserID uint
+		}
+		config.DB.Table("enrollments").Select("user_id").Where("course_id = ?", section.CourseID).Find(&enrollments)
+
+		// 4. Send Notification to each Enrolled Student
+		notifTitle := "New Quiz Available! 📝"
+		notifMsg := fmt.Sprintf("A new quiz '%s' has been published in your course '%s'.", quizTitle, course.Title)
+		redirectLink := fmt.Sprintf("/learn/%d", section.CourseID)
+
+		for _, e := range enrollments {
+			notification := models.Notification{
+				UserID:  e.UserID,
+				Title:   notifTitle,
+				Message: notifMsg,
+				Type:    "QUIZ",
+				Link:    redirectLink,
+				IsRead:  false,
+			}
+			config.DB.Create(&notification)
+		}
+	}(input.SectionID, input.Title)
+
+	c.JSON(http.StatusCreated, gin.H{"message": "Quiz created successfully and notifications sent", "quiz": quiz})
 }
 
 // Get All Quizzes by Section ID (Student/Instructor) - FIXED FOR MULTIPLE QUIZZES

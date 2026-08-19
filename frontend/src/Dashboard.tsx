@@ -33,8 +33,10 @@ interface AdminStats {
 const Dashboard: React.FC = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<number[]>([]);
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [enrollingId, setEnrollingId] = useState<number | null>(null);
 
   // Notification States
   const [notifications, setNotifications] = useState<any[]>([]);
@@ -73,26 +75,55 @@ const Dashboard: React.FC = () => {
   };
 
   const fetchProfileAndData = async () => {
+  try {
+    // 1. Fetch Logged-in User Profile
+    const profileRes = await API.get('/profile');
+    const currentUser: UserProfile = profileRes.data.user;
+    setUser(currentUser);
+
+    // 2. Fetch All Courses
+    const courseRes = await API.get('/courses');
+    setCourses(courseRes.data.courses || []);
+
+    // 3. Fetch Enrolled Courses for Current User (/my-courses හරියාකාරව Call කිරීම)
     try {
-      // 1. Fetch Logged-in User Profile
-      const profileRes = await API.get('/profile');
-      const currentUser: UserProfile = profileRes.data.user;
-      setUser(currentUser);
+      const myCoursesRes = await API.get('/my-courses');
+      const enrollments = myCoursesRes.data.enrollments || [];
+      
+      // enrollments array එකෙන් course_id ටික විතරක් ගෙන එකතු කිරීම
+      const enrolledIds = enrollments.map((e: any) => e.course_id);
+      setEnrolledCourseIds(enrolledIds);
+    } catch (e) {
+      console.error("Could not fetch user enrollments", e);
+    }
 
-      // 2. Fetch All Courses
-      const courseRes = await API.get('/courses');
-      setCourses(courseRes.data.courses || []);
+    // 4. Fetch Analytics if Admin / Instructor
+    if (currentUser.role === 'ADMIN' || currentUser.role === 'INSTRUCTOR') {
+      const statsRes = await API.get('/analytics/admin');
+      setAdminStats(statsRes.data.stats);
+    }
 
-      // 3. Fetch Analytics if Admin / Instructor
-      if (currentUser.role === 'ADMIN' || currentUser.role === 'INSTRUCTOR') {
-        const statsRes = await API.get('/analytics/admin');
-        setAdminStats(statsRes.data.stats);
-      }
+    setLoading(false);
+  } catch (err) {
+    console.error('Failed to load dashboard data:', err);
+    setLoading(false);
+  }
+};
 
-      setLoading(false);
-    } catch (err) {
-      console.error('Failed to load dashboard data:', err);
-      setLoading(false);
+  const handleEnroll = async (course: Course) => {
+    setEnrollingId(course.id);
+    try {
+      await API.post('/enrollments', {
+        course_id: course.id,
+        amount: course.price,
+      });
+      alert(`Successfully Enrolled in ${course.title}!`);
+      // Reload dashboard data so enrolled status updates immediately
+      fetchProfileAndData();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Enrollment failed');
+    } finally {
+      setEnrollingId(null);
     }
   };
 
@@ -213,9 +244,9 @@ const Dashboard: React.FC = () => {
           icon: '📚'
         },
         {
-          label: 'LEARNING STATUS',
-          value: 'Active',
-          subtext: 'On track',
+          label: 'MY ENROLLED COURSES',
+          value: enrolledCourseIds.length,
+          subtext: 'Currently Enrolled',
           subColor: '#16a34a',
           iconBg: '#f1f5f9',
           icon: '🚀'
@@ -757,9 +788,6 @@ const Dashboard: React.FC = () => {
           <h2 style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', margin: 0 }}>
             Active Courses
           </h2>
-          <button style={{ background: 'none', border: 'none', color: '#4f46e5', fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>
-            View All
-          </button>
         </div>
 
         <div
@@ -771,6 +799,8 @@ const Dashboard: React.FC = () => {
         >
           {courses.map((course, idx) => {
             const bgGradient = courseGradients[idx % courseGradients.length];
+            const isEnrolled = enrolledCourseIds.includes(course.id);
+
             return (
               <div
                 key={course.id}
@@ -872,22 +902,44 @@ const Dashboard: React.FC = () => {
                     gap: 10,
                   }}
                 >
-                  <button
-                    onClick={() => navigate(`/learn/${course.id}`)}
-                    style={{
-                      flex: 1,
-                      background: '#4f46e5',
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '10px',
-                      borderRadius: 10,
-                      fontWeight: 600,
-                      fontSize: 13.5,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    View Course
-                  </button>
+                  {/* Conditional Rendering: View Course VS Enroll Now */}
+                  {isEnrolled || isStaff ? (
+                    <button
+                      onClick={() => navigate(`/learn/${course.id}`)}
+                      style={{
+                        flex: 1,
+                        background: '#4f46e5',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '10px',
+                        borderRadius: 10,
+                        fontWeight: 600,
+                        fontSize: 13.5,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      View Course
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleEnroll(course)}
+                      disabled={enrollingId === course.id}
+                      style={{
+                        flex: 1,
+                        background: '#10b981',
+                        color: '#ffffff',
+                        border: 'none',
+                        padding: '10px',
+                        borderRadius: 10,
+                        fontWeight: 600,
+                        fontSize: 13.5,
+                        cursor: 'pointer',
+                        opacity: enrollingId === course.id ? 0.7 : 1,
+                      }}
+                    >
+                      {enrollingId === course.id ? 'Enrolling...' : 'Enroll Now'}
+                    </button>
+                  )}
 
                   {isStaff && (
                     <button
@@ -913,7 +965,7 @@ const Dashboard: React.FC = () => {
             );
           })}
 
-          {/* Placeholder Card */}
+          {/* Placeholder Card for Staff */}
           {isStaff && (
             <div
               onClick={() => setShowCourseForm(true)}
