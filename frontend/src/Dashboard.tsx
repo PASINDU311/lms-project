@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import API from './api';
+import API, { getNotifications, markAllNotificationsAsRead } from './api';
 
-// AdminUserManagement component එක
+// AdminUserManagement component
 import AdminUserManagement from './AdminUserManagement';
 
 interface Course {
@@ -36,6 +36,10 @@ const Dashboard: React.FC = () => {
   const [adminStats, setAdminStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  // Notification States
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
   // New Course Form State
   const [showCourseForm, setShowCourseForm] = useState(false);
   const [title, setTitle] = useState('');
@@ -44,9 +48,29 @@ const Dashboard: React.FC = () => {
 
   const navigate = useNavigate();
 
+  // Combined Initial Data Fetching
   useEffect(() => {
     fetchProfileAndData();
+    fetchNotifications();
   }, []);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await getNotifications();
+      setNotifications(res.data.notifications || []);
+    } catch (err) {
+      console.error('Failed to load notifications:', err);
+    }
+  };
+
+  const handleMarkAllRead = async () => {
+    try {
+      await markAllNotificationsAsRead();
+      fetchNotifications();
+    } catch (err) {
+      console.error('Failed to mark notifications as read', err);
+    }
+  };
 
   const fetchProfileAndData = async () => {
     try {
@@ -127,7 +151,7 @@ const Dashboard: React.FC = () => {
 
   const isStaff = user?.role === 'ADMIN' || user?.role === 'INSTRUCTOR';
 
-  // Stats Card Data strictly matching the sleek modern design
+  // Stats Card Data
   const statCards = isStaff && adminStats
     ? [
         {
@@ -198,7 +222,6 @@ const Dashboard: React.FC = () => {
         },
       ];
 
-  // Course Banners Gradients for Card Headers
   const courseGradients = [
     'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
     'linear-gradient(135deg, #059669 0%, #10b981 100%)',
@@ -215,7 +238,7 @@ const Dashboard: React.FC = () => {
         color: '#0f172a',
       }}
     >
-      {/* 1. Top Navbar */}
+      {/* Navbar */}
       <header
         style={{
           background: '#ffffff',
@@ -296,7 +319,7 @@ const Dashboard: React.FC = () => {
             </nav>
           </div>
 
-          {/* Right Header Controls */}
+          {/* Right Controls */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             {isStaff && (
               <button
@@ -320,19 +343,95 @@ const Dashboard: React.FC = () => {
               </button>
             )}
 
-            {/* Notification & Settings */}
-            <button
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#64748b',
-                cursor: 'pointer',
-                padding: 6,
-                borderRadius: '50%',
-              }}
-            >
-              🔔
-            </button>
+            {/* Notification Dropdown Component */}
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#64748b',
+                  cursor: 'pointer',
+                  padding: 6,
+                  borderRadius: '50%',
+                  position: 'relative',
+                  fontSize: 18,
+                }}
+              >
+                🔔
+                {notifications.filter((n) => !n.is_read).length > 0 && (
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      background: '#ef4444',
+                      color: '#fff',
+                      fontSize: 10,
+                      fontWeight: 700,
+                      borderRadius: '50%',
+                      width: 16,
+                      height: 16,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {notifications.filter((n) => !n.is_read).length}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: 0,
+                    top: 40,
+                    width: 320,
+                    background: '#ffffff',
+                    borderRadius: 12,
+                    boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)',
+                    border: '1px solid #e2e8f0',
+                    zIndex: 50,
+                    padding: 16,
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                    <h4 style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#0f172a' }}>Notifications</h4>
+                    <button
+                      onClick={handleMarkAllRead}
+                      style={{ background: 'none', border: 'none', color: '#4f46e5', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                    >
+                      Mark all as read
+                    </button>
+                  </div>
+
+                  <div style={{ maxHeight: 280, overflowY: 'auto' }}>
+                    {notifications.length === 0 ? (
+                      <p style={{ fontSize: 13, color: '#94a3b8', margin: 0, padding: '12px 0', textAlign: 'center' }}>
+                        No notifications available
+                      </p>
+                    ) : (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          style={{
+                            padding: '10px 0',
+                            borderBottom: '1px solid #f1f5f9',
+                            opacity: n.is_read ? 0.6 : 1,
+                          }}
+                        >
+                          <div style={{ fontSize: 13, fontWeight: 600, color: '#1e293b' }}>{n.title}</div>
+                          <div style={{ fontSize: 12, color: '#64748b', marginTop: 2 }}>{n.message}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               style={{
                 background: 'none',
@@ -370,7 +469,7 @@ const Dashboard: React.FC = () => {
       </header>
 
       <main style={{ maxWidth: 1280, margin: '0 auto', padding: '36px 24px 64px' }}>
-        {/* 2. Welcome Banner Header */}
+        {/* Welcome Header */}
         <div
           style={{
             display: 'flex',
@@ -445,7 +544,7 @@ const Dashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* 3. Analytics Metric Cards */}
+        {/* Analytics Grid */}
         <div
           style={{
             display: 'grid',
@@ -512,7 +611,7 @@ const Dashboard: React.FC = () => {
           ))}
         </div>
 
-        {/* 4. Admin User Management Section */}
+        {/* Admin User Management */}
         {user?.role === 'ADMIN' && (
           <div
             style={{
@@ -532,7 +631,7 @@ const Dashboard: React.FC = () => {
           </div>
         )}
 
-        {/* 5. Create Course Collapsible Form */}
+        {/* Create Course Form */}
         <AnimatePresence>
           {showCourseForm && (
             <motion.form
@@ -653,7 +752,7 @@ const Dashboard: React.FC = () => {
           )}
         </AnimatePresence>
 
-        {/* 6. Active Courses Section */}
+        {/* Active Courses */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: '#0f172a', margin: 0 }}>
             Active Courses
@@ -687,7 +786,6 @@ const Dashboard: React.FC = () => {
                 }}
               >
                 <div>
-                  {/* Card Colored Header */}
                   <div
                     style={{
                       height: 120,
@@ -722,7 +820,6 @@ const Dashboard: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Card Content Body */}
                   <div style={{ padding: 20 }}>
                     <h3
                       style={{
@@ -750,7 +847,6 @@ const Dashboard: React.FC = () => {
                       {course.description}
                     </p>
 
-                    {/* Progress / Capacity Bar */}
                     <div style={{ marginBottom: 20 }}>
                       <div style={{ height: 6, width: '100%', background: '#e2e8f0', borderRadius: 999, overflow: 'hidden' }}>
                         <div
@@ -769,7 +865,6 @@ const Dashboard: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Card Actions */}
                 <div
                   style={{
                     padding: '0 20px 20px 20px',
@@ -818,7 +913,7 @@ const Dashboard: React.FC = () => {
             );
           })}
 
-          {/* Create New Course Placeholder Card */}
+          {/* Placeholder Card */}
           {isStaff && (
             <div
               onClick={() => setShowCourseForm(true)}
@@ -833,7 +928,6 @@ const Dashboard: React.FC = () => {
                 padding: 24,
                 cursor: 'pointer',
                 background: '#f8fafc',
-                transition: 'border-color 0.2s',
               }}
             >
               <div

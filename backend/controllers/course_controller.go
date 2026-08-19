@@ -58,6 +58,29 @@ func CreateCourse(c *gin.Context) {
 		return
 	}
 
+	// -------------------------------------------------------------
+	// FIX: Safe role query (Case-insensitive) & send notifications to students
+	// -------------------------------------------------------------
+	var students []models.User
+	// "STUDENT", "student", "Student" okkoma roles ahuwenna UPPER() use kara
+	if err := config.DB.Where("LOWER(role) = ?", "student").Find(&students).Error; err == nil && len(students) > 0 {
+		var notifications []models.Notification
+
+		for _, student := range students {
+			notifications = append(notifications, models.Notification{
+				UserID:  student.ID,
+				Title:   "New Course Published! 📚",
+				Message: fmt.Sprintf("A new course '%s' is now available.", course.Title),
+				Type:    "COURSE",
+				Link:    fmt.Sprintf("/learn/%d", course.ID),
+				IsRead:  false,
+			})
+		}
+
+		// Batch Insert Notification Records
+		config.DB.Create(&notifications)
+	}
+
 	c.JSON(http.StatusCreated, gin.H{"message": "Course created successfully", "course": course})
 }
 

@@ -7,6 +7,7 @@ import (
 	"lms-backend/models"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // 1. Get All Users (Admin Only)

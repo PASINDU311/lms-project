@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from './api';
 import QuizBuilder from './QuizBuilder';
@@ -54,7 +54,8 @@ const CourseBuilder: React.FC = () => {
   // Quiz Toggle State
   const [activeQuizSectionId, setActiveQuizSectionId] = useState<number | null>(null);
 
-  const fetchCourseDetails = () => {
+  const fetchCourseDetails = useCallback(() => {
+    if (!id) return;
     API.get(`/courses/${id}`)
       .then((res) => {
         setCourse(res.data.course);
@@ -64,16 +65,16 @@ const CourseBuilder: React.FC = () => {
         console.error('Failed to fetch course details:', err);
         setLoading(false);
       });
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchCourseDetails();
-  }, [id]);
+  }, [fetchCourseDetails]);
 
   // Section Actions
   const handleAddSection = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!sectionTitle) return;
+    if (!sectionTitle.trim()) return;
     try {
       await API.post('/sections', {
         course_id: Number(id),
@@ -82,18 +83,21 @@ const CourseBuilder: React.FC = () => {
       });
       setSectionTitle('');
       fetchCourseDetails();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to add section');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Failed to add section');
     }
   };
 
   const handleUpdateSection = async (sectionId: number) => {
+    if (!editSectionTitle.trim()) return;
     try {
       await API.put(`/sections/${sectionId}`, { title: editSectionTitle });
       setEditingSectionId(null);
       fetchCourseDetails();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to update section');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Failed to update section');
     }
   };
 
@@ -102,15 +106,16 @@ const CourseBuilder: React.FC = () => {
     try {
       await API.delete(`/sections/${sectionId}`);
       fetchCourseDetails();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to delete section');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Failed to delete section');
     }
   };
 
   // Lesson Actions
   const handleAddLesson = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedSectionId || !lessonTitle) return;
+    if (!selectedSectionId || !lessonTitle.trim()) return;
     try {
       await API.post('/lessons', {
         section_id: selectedSectionId,
@@ -126,12 +131,14 @@ const CourseBuilder: React.FC = () => {
       setContent('');
       setSelectedSectionId(null);
       fetchCourseDetails();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to add lesson');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Failed to add lesson');
     }
   };
 
   const handleUpdateLesson = async (lessonId: number) => {
+    if (!editLessonTitle.trim()) return;
     try {
       await API.put(`/lessons/${lessonId}`, {
         title: editLessonTitle,
@@ -140,8 +147,9 @@ const CourseBuilder: React.FC = () => {
       });
       setEditingLessonId(null);
       fetchCourseDetails();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to update lesson');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Failed to update lesson');
     }
   };
 
@@ -150,8 +158,9 @@ const CourseBuilder: React.FC = () => {
     try {
       await API.delete(`/lessons/${lessonId}`);
       fetchCourseDetails();
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to delete lesson');
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { error?: string } } };
+      alert(error.response?.data?.error || 'Failed to delete lesson');
     }
   };
 
@@ -180,9 +189,9 @@ const CourseBuilder: React.FC = () => {
       
       {/* Breadcrumb Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
-        <span style={{ cursor: 'pointer', transition: 'color 0.2s' }} onClick={() => navigate('/dashboard')}>Dashboard</span>
+        <span style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>Dashboard</span>
         <span>&rsaquo;</span>
-        <span style={{ cursor: 'pointer', transition: 'color 0.2s' }} onClick={() => navigate('/dashboard')}>My Courses</span>
+        <span style={{ cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>My Courses</span>
         <span>&rsaquo;</span>
         <span style={{ color: '#4f46e5', fontWeight: 600 }}>Course Curriculum Builder</span>
       </div>
@@ -378,7 +387,7 @@ const CourseBuilder: React.FC = () => {
                       setEditingSectionId(section.id);
                       setEditSectionTitle(section.title);
                     }}
-                    style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', transition: 'background 0.2s' }}
+                    style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px' }}
                     onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
                     onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
@@ -386,7 +395,7 @@ const CourseBuilder: React.FC = () => {
                   </button>
                   <button
                     onClick={() => handleDeleteSection(section.id)}
-                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', transition: 'background 0.2s' }}
+                    style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px' }}
                     onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
                     onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
@@ -464,10 +473,10 @@ const CourseBuilder: React.FC = () => {
                               onClick={() => {
                                 setEditingLessonId(lesson.id);
                                 setEditLessonTitle(lesson.title);
-                                setEditLessonVideoUrl(lesson.video_url);
-                                setEditLessonContent(lesson.content);
+                                setEditLessonVideoUrl(lesson.video_url || '');
+                                setEditLessonContent(lesson.content || '');
                               }}
-                              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', transition: 'background 0.2s' }}
+                              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px' }}
                               onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#f1f5f9')}
                               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                             >
@@ -475,7 +484,7 @@ const CourseBuilder: React.FC = () => {
                             </button>
                             <button
                               onClick={() => handleDeleteLesson(lesson.id)}
-                              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px', transition: 'background 0.2s' }}
+                              style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', fontSize: '13px', fontWeight: 600, padding: '4px 8px', borderRadius: '6px' }}
                               onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#fef2f2')}
                               onMouseOut={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                             >
@@ -497,7 +506,7 @@ const CourseBuilder: React.FC = () => {
 
               {/* Add Lesson Form Expansion */}
               {selectedSectionId === section.id && (
-                <form onSubmit={handleAddLesson} style={{ marginTop: '20px', padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.01)' }}>
+                <form onSubmit={handleAddLesson} style={{ marginTop: '20px', padding: '20px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
                   <h5 style={{ margin: '0 0 14px 0', fontSize: '15px', fontWeight: 700, color: '#1e293b' }}>Add New Lesson to: {section.title}</h5>
                   <input
                     type="text"
@@ -521,7 +530,7 @@ const CourseBuilder: React.FC = () => {
                     rows={3}
                     style={{ width: '100%', padding: '10px 14px', marginBottom: '14px', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', outline: 'none', fontSize: '14px' }}
                   />
-                  <button type="submit" style={{ padding: '10px 20px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13.5px', boxShadow: '0 2px 4px rgba(16, 185, 129, 0.2)' }}>
+                  <button type="submit" style={{ padding: '10px 20px', background: '#10b981', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '13.5px' }}>
                     Save Lesson
                   </button>
                 </form>
@@ -606,7 +615,7 @@ const CourseBuilder: React.FC = () => {
           </div>
         ))
       ) : (
-        <div style={{ textAlign: 'center', padding: '60px 24px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0', boxShadow: '0 4px 12px rgba(0,0,0,0.02)' }}>
+        <div style={{ textAlign: 'center', padding: '60px 24px', backgroundColor: '#ffffff', borderRadius: '16px', border: '1px solid #e2e8f0' }}>
           <div style={{ fontSize: '36px', marginBottom: '12px' }}>📚</div>
           <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0f172a', margin: '0 0 6px 0' }}>No sections added yet</h3>
           <p style={{ color: '#64748b', fontSize: '14px', margin: 0 }}>Start building your comprehensive course structure by adding a section above.</p>

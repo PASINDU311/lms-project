@@ -50,7 +50,7 @@ func SetupRouter() *gin.Engine {
 		protected.POST("/enrollments", controllers.EnrollCourse)
 		protected.GET("/my-courses", controllers.GetMyEnrollments)
 
-		// Student Analytics Overview 🔥 NEW
+		// Student Analytics Overview
 		protected.GET("/analytics/student", controllers.GetStudentAnalytics)
 
 		// Quiz Routes (Student)
@@ -65,11 +65,16 @@ func SetupRouter() *gin.Engine {
 		// Review Routes
 		protected.POST("/reviews", controllers.AddOrUpdateReview)
 
+		// Notification Routes 🔔 NEW
+		protected.GET("/notifications", controllers.GetMyNotifications)
+		protected.PUT("/notifications/:id/read", controllers.MarkNotificationAsRead)
+		protected.PUT("/notifications/read-all", controllers.MarkAllNotificationsAsRead)
+
 		// Instructor / Admin Only Routes
 		instructorAdmin := protected.Group("")
 		instructorAdmin.Use(middlewares.RoleMiddleware("INSTRUCTOR", "ADMIN"))
 		{
-			// Admin Analytics 🔥 NEW
+			// Admin Analytics
 			instructorAdmin.GET("/analytics/admin", controllers.GetAdminAnalytics)
 
 			// Course Management
@@ -95,12 +100,14 @@ func SetupRouter() *gin.Engine {
 			instructorAdmin.GET("/assignments/:assignment_id/submissions", controllers.GetAssignmentSubmissions)
 			instructorAdmin.PUT("/assignments/submissions/:submission_id/grade", controllers.GradeAssignment)
 
+			// Broadcast Announcement Notification 🔔 NEW
+			instructorAdmin.POST("/notifications/broadcast", controllers.CreateNotification)
+
 			// User Management & Moderation (Admin Only)
 			instructorAdmin.GET("/users", controllers.GetAllUsers)
 			instructorAdmin.PUT("/users/:id/role", controllers.UpdateUserRole)
 			instructorAdmin.DELETE("/users/:id", controllers.DeleteUser)
 			instructorAdmin.DELETE("/reviews/:id", controllers.DeleteReview)
-
 			instructorAdmin.POST("/users/create", controllers.CreateUserByAdmin)
 		}
 	}

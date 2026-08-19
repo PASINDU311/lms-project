@@ -8,6 +8,7 @@ import CreateCourse from './CreateCourse';
 import MyCourses from './MyCourses';
 import CoursePlayer from './CoursePlayer';
 import CourseBuilder from './CourseBuilder';
+import AdminUserManagement from './AdminUserManagement'; // AdminUserManagement එක Import කළා
 
 const App: React.FC = () => {
   const token = sessionStorage.getItem('token') || localStorage.getItem('token');
@@ -19,6 +20,7 @@ const App: React.FC = () => {
         <Route path="/login" element={!token ? <Login /> : <Navigate to="/dashboard" />} />
         <Route path="/register" element={!token ? <Register /> : <Navigate to="/dashboard" />} />
         <Route path="/dashboard" element={token ? <Dashboard /> : <Navigate to="/" />} />
+        <Route path="/admin" element={token ? <AdminUserManagement /> : <Navigate to="/" />} /> {/* Route එක සෙට් කළා */}
         <Route path="/courses/:id" element={token ? <CourseDetail /> : <Navigate to="/" />} />
         <Route path="/create-course" element={token ? <CreateCourse /> : <Navigate to="/" />} />
         <Route path="/my-courses" element={token ? <MyCourses /> : <Navigate to="/" />} />

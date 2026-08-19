@@ -34,7 +34,7 @@ func ConnectDatabase() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	// Quiz Models ටික AutoMigrate එකට එකතු කළා
+	// FIX: &models.Notification{} එක AutoMigrate එකට එකතු කළා
 	err = database.AutoMigrate(
 		&models.User{},
 		&models.Course{},
@@ -47,6 +47,7 @@ func ConnectDatabase() {
 		&models.Question{},
 		&models.Option{},
 		&models.QuizResult{},
+		&models.Notification{}, // <-- Fix: Database Table එක auto create වෙනවා
 	)
 	if err != nil {
 		log.Println("Failed to auto migrate database models:", err)
