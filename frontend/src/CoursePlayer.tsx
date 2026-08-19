@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import API from './api';
@@ -42,15 +42,18 @@ const CoursePlayer: React.FC = () => {
   const [showCertificate, setShowCertificate] = useState<boolean>(false);
   const [expandedSections, setExpandedSections] = useState<Record<number, boolean>>({});
 
-  const fetchProgress = () => {
+  const fetchProgress = useCallback(() => {
+    if (!id) return;
     API.get(`/progress/${id}`)
       .then((res) => {
-        setCompletedLessonIds(res.data.completed_lesson_ids || []);
+        setCompletedLessonIds(res.data?.completed_lesson_ids || []);
       })
       .catch((err) => console.error('Failed to load progress', err));
-  };
+  }, [id]);
 
   useEffect(() => {
+    if (!id) return;
+
     // Current User Profile & Role Fetch
     API.get('/profile')
       .then((res) => {
@@ -63,13 +66,14 @@ const CoursePlayer: React.FC = () => {
 
     API.get(`/courses/${id}`)
       .then((res) => {
-        const fetchedCourse = res.data.course;
+        const fetchedCourse: Course = res.data?.course || res.data;
         setCourse(fetchedCourse);
 
         if (fetchedCourse?.sections?.length > 0) {
-          setSelectedSectionId(fetchedCourse.sections[0].id);
-          if (fetchedCourse.sections[0].lessons?.length > 0) {
-            setSelectedLesson(fetchedCourse.sections[0].lessons[0]);
+          const firstSection = fetchedCourse.sections[0];
+          setSelectedSectionId(firstSection.id);
+          if (firstSection.lessons?.length > 0) {
+            setSelectedLesson(firstSection.lessons[0]);
           }
 
           // Expand all sections by default
@@ -87,7 +91,7 @@ const CoursePlayer: React.FC = () => {
       });
 
     fetchProgress();
-  }, [id]);
+  }, [id, fetchProgress]);
 
   const toggleSection = (sectionId: number) => {
     setExpandedSections((prev) => ({
@@ -122,7 +126,7 @@ const CoursePlayer: React.FC = () => {
   };
 
   const totalLessons = course?.sections?.reduce((acc, sec) => acc + (sec.lessons?.length || 0), 0) || 0;
-  const progressPercent = totalLessons > 0 ? Math.round((completedLessonIds.length / totalLessons) * 100) : 0;
+  const progressPercent = totalLessons > 0 ? Math.min(100, Math.round((completedLessonIds.length / totalLessons) * 100)) : 0;
 
   const isInstructorOrAdmin = userRole === 'INSTRUCTOR' || userRole === 'ADMIN';
 

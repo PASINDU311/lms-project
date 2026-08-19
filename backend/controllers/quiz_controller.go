@@ -58,17 +58,22 @@ func CreateQuiz(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Quiz created successfully", "quiz": quiz})
 }
 
-// Get Quiz by Section ID (Student/Instructor)
+// Get All Quizzes by Section ID (Student/Instructor) - FIXED FOR MULTIPLE QUIZZES
 func GetQuizBySection(c *gin.Context) {
 	sectionID := c.Param("section_id")
 
-	var quiz models.Quiz
-	if err := config.DB.Preload("Questions.Options").Where("section_id = ?", sectionID).First(&quiz).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "No quiz found for this section"})
+	var quizzes []models.Quiz
+	if err := config.DB.Preload("Questions.Options").Where("section_id = ?", sectionID).Find(&quizzes).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch quizzes"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"quiz": quiz})
+	if len(quizzes) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "No quizzes found for this section"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"quizzes": quizzes})
 }
 
 // Submit Quiz and Auto-Calculate Score (Student)
@@ -80,7 +85,7 @@ func SubmitQuiz(c *gin.Context) {
 	}
 
 	var input struct {
-		QuizID  uint            `json:"quiz_id" binding:"required"`
+		QuizID  uint          `json:"quiz_id" binding:"required"`
 		Answers map[uint]uint `json:"answers" binding:"required"` // QuestionID -> SelectedOptionID
 	}
 

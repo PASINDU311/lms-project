@@ -2,36 +2,12 @@ package controllers
 
 import (
 	"net/http"
-	"strconv"
 
 	"lms-backend/config"
 	"lms-backend/models"
 
 	"github.com/gin-gonic/gin"
 )
-
-// Helper function to extract user_id correctly from Context
-func getUserID(c *gin.Context) (uint, bool) {
-	val, exists := c.Get("user_id") // Key updated to "user_id"
-	if !exists {
-		return 0, false
-	}
-
-	switch v := val.(type) {
-	case uint:
-		return v, true
-	case float64:
-		return uint(v), true
-	case string:
-		id, err := strconv.ParseUint(v, 10, 32)
-		if err != nil {
-			return 0, false
-		}
-		return uint(id), true
-	default:
-		return 0, false
-	}
-}
 
 // Toggle or Mark Lesson as Completed
 func CompleteLesson(c *gin.Context) {
