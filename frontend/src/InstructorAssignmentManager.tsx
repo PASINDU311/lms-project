@@ -6,6 +6,7 @@ interface Assignment {
   title: string;
   description: string;
   max_marks: number;
+  due_date?: string;
 }
 
 interface Submission {
@@ -35,6 +36,7 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [maxMarks, setMaxMarks] = useState<number>(100);
+  const [dueDate, setDueDate] = useState('');
 
   // Submissions State for Grading
   const [selectedAssignmentId, setSelectedAssignmentId] = useState<number | null>(null);
@@ -66,11 +68,13 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
         title,
         description,
         max_marks: Number(maxMarks),
+        due_date: dueDate ? new Date(dueDate).toISOString() : null,
       });
       alert('Assignment created successfully!');
       setTitle('');
       setDescription('');
       setMaxMarks(100);
+      setDueDate('');
       setShowCreateForm(false);
       fetchAssignments();
     } catch (err: any) {
@@ -78,7 +82,6 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
     }
   };
 
-  // 📝 Fetch Submissions to Grade
   const handleViewSubmissions = async (assignmentId: number) => {
     if (selectedAssignmentId === assignmentId) {
       setSelectedAssignmentId(null);
@@ -96,7 +99,6 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
     }
   };
 
-  // 💯 Submit Grade & Feedback
   const handleGradeSubmission = async (submissionId: number) => {
     const marks = gradingMarks[submissionId];
     const feedback = gradingFeedback[submissionId] || '';
@@ -113,7 +115,7 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
       });
       alert('Grade & Feedback saved successfully!');
       if (selectedAssignmentId) {
-        handleViewSubmissions(selectedAssignmentId); // Refresh submissions list
+        handleViewSubmissions(selectedAssignmentId);
       }
     } catch (err: any) {
       alert(err.response?.data?.error || 'Failed to grade submission');
@@ -151,14 +153,25 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
             rows={2}
             style={{ width: '100%', padding: '6px', marginBottom: '8px', boxSizing: 'border-box' }}
           />
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px' }}>
-            <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Max Marks:</label>
-            <input
-              type="number"
-              value={maxMarks}
-              onChange={(e) => setMaxMarks(Number(e.target.value))}
-              style={{ width: '80px', padding: '4px' }}
-            />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Max Marks:</label>
+              <input
+                type="number"
+                value={maxMarks}
+                onChange={(e) => setMaxMarks(Number(e.target.value))}
+                style={{ width: '80px', padding: '4px' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+              <label style={{ fontSize: '12px', fontWeight: 'bold' }}>Deadline (Due Date & Time):</label>
+              <input
+                type="datetime-local"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+                style={{ padding: '4px', fontSize: '12px' }}
+              />
+            </div>
           </div>
           <button type="submit" style={{ padding: '6px 12px', background: '#27ae60', color: '#fff', border: 'none', borderRadius: '3px', cursor: 'pointer', fontSize: '12px' }}>
             Save Assignment
@@ -173,7 +186,14 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <strong style={{ fontSize: '13px', color: '#1e293b' }}>{assignment.title}</strong>
-                <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#64748b' }}>{assignment.description} (Max Marks: {assignment.max_marks})</p>
+                <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#64748b' }}>
+                  {assignment.description} (Max Marks: {assignment.max_marks})
+                  {assignment.due_date && (
+                    <span style={{ marginLeft: 8, color: '#dc2626', fontWeight: 'bold' }}>
+                      ⏳ Due: {new Date(assignment.due_date).toLocaleString()}
+                    </span>
+                  )}
+                </p>
               </div>
               <button
                 onClick={() => handleViewSubmissions(assignment.id)}
@@ -212,7 +232,6 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId, sectionTitle 
                         </div>
                       )}
 
-                      {/* Grading Input Box */}
                       <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center' }}>
                         <input
                           type="number"

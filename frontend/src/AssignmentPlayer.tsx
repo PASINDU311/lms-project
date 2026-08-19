@@ -8,6 +8,7 @@ interface Assignment {
   title: string;
   description: string;
   max_marks: number;
+  due_date?: string;
 }
 
 interface Submission {
@@ -25,6 +26,49 @@ interface Props {
   sectionId: number;
 }
 
+// Helper component for live countdown calculation
+const CountdownBadge: React.FC<{ dueDate: string }> = ({ dueDate }) => {
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number; expired: boolean }>({
+    days: 0, hours: 0, minutes: 0, seconds: 0, expired: false
+  });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const difference = new Date(dueDate).getTime() - new Date().getTime();
+      if (difference <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: true });
+        return;
+      }
+
+      setTimeLeft({
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / 1000 / 60) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+        expired: false,
+      });
+    };
+
+    calculateTimeLeft();
+    const interval = setInterval(calculateTimeLeft, 1000);
+    return () => clearInterval(interval);
+  }, [dueDate]);
+
+  if (timeLeft.expired) {
+    return (
+      <span style={{ background: '#fef2f2', color: '#991b1b', border: '1px solid #fca5a5', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}>
+        🚫 Deadline Passed
+      </span>
+    );
+  }
+
+  return (
+    <span style={{ background: '#fff7ed', color: '#c2410c', border: '1px solid #fed7aa', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 700 }}>
+      ⏳ Due in: {timeLeft.days > 0 ? `${timeLeft.days}d ` : ''}{timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+    </span>
+  );
+};
+
 const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [submissions, setSubmissions] = useState<{ [key: number]: Submission }>({});
@@ -34,7 +78,6 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
   const [userRole, setUserRole] = useState<string>('STUDENT');
 
   useEffect(() => {
-    // Check logged-in user role
     API.get('/profile')
       .then((res) => {
         if (res.data?.user?.role) {
@@ -52,7 +95,6 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
       const assignList: Assignment[] = res.data.assignments || [];
       setAssignments(assignList);
 
-      // Fetch user submissions if student
       assignList.forEach(async (a) => {
         try {
           const subRes = await API.get(`/assignments/${a.id}/my-submission`);
@@ -117,7 +159,7 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
             Section Assignments
           </h3>
           <p style={{ margin: '2px 0 0 0', fontSize: 13, color: '#64748b' }}>
-            Complete the assignments below to demonstrate your knowledge.
+            Complete the assignments below before the deadline.
           </p>
         </div>
       </div>
@@ -125,6 +167,7 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {assignments.map((a) => {
           const submission = submissions[a.id];
+          const isExpired = a.due_date ? new Date(a.due_date).getTime() < new Date().getTime() : false;
 
           return (
             <div
@@ -136,7 +179,7 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                 border: '1px solid #e2e8f0',
               }}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                 <div>
                   <h4 style={{ margin: '0 0 6px 0', fontSize: 16, fontWeight: 700, color: '#1e293b' }}>
                     {a.title}
@@ -145,19 +188,22 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                     {a.description}
                   </p>
                 </div>
-                <span
-                  style={{
-                    backgroundColor: '#e0e7ff',
-                    color: '#3730a3',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    padding: '4px 10px',
-                    borderRadius: 20,
-                    whiteSpace: 'nowrap',
-                  }}
-                >
-                  Max Marks: {a.max_marks}
-                </span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  {a.due_date && <CountdownBadge dueDate={a.due_date} />}
+                  <span
+                    style={{
+                      backgroundColor: '#e0e7ff',
+                      color: '#3730a3',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      padding: '4px 10px',
+                      borderRadius: 20,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    Max Marks: {a.max_marks}
+                  </span>
+                </div>
               </div>
 
               {/* Instructor / Admin View */}
@@ -246,6 +292,25 @@ const AssignmentPlayer: React.FC<Props> = ({ sectionId }) => {
                       </div>
                     )}
                   </div>
+                </div>
+              ) : isExpired ? (
+                /* Deadline Passed Box */
+                <div
+                  style={{
+                    marginTop: 12,
+                    padding: 16,
+                    background: '#fef2f2',
+                    borderRadius: 10,
+                    border: '1px solid #fca5a5',
+                    color: '#991b1b',
+                    fontSize: 13.5,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  ⚠️ The deadline for this assignment has passed. Submissions are now closed.
                 </div>
               ) : (
                 /* Student: Submission Form */
