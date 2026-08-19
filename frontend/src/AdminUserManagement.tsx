@@ -115,7 +115,7 @@ const AdminDashboard: React.FC = () => {
   }
 
   return (
-    <div style={{ maxWidth: '1020px', margin: '0 auto', padding: '40px 24px', fontFamily: "'Inter', sans-serif", color: '#201F1C', backgroundColor: '#FAF8F3', minHeight: '100vh' }}>
+    <div style={{ width: '100%', padding: '32px', fontFamily: "'Inter', sans-serif", color: '#201F1C', backgroundColor: '#FAF8F3', minHeight: '100vh', boxSizing: 'border-box' }}>
       <style>
         {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
       </style>

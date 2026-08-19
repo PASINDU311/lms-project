@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import Home from './Home'; // 👈 Home Component එක Import කළා
+import Home from './Home' // 👈 Home Component එක Import කළා
 import Login from './Login';
 import Register from './Register';
 import Dashboard from './Dashboard';

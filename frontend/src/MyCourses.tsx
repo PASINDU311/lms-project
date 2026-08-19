@@ -82,8 +82,7 @@ const MyCourses: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
         style={{
-          maxWidth: '1100px',
-          margin: '0 auto',
+          width: '100%',
         }}
       >
         {/* Navigation / Header Section */}

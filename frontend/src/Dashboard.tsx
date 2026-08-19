@@ -281,7 +281,7 @@ const Dashboard: React.FC = () => {
   const ruleColors = [T.forest, T.brick, T.marigold, T.slate];
 
   return (
-    <div style={{ minHeight: '100vh', background: T.paper, fontFamily: T.body, color: T.ink }}>
+    <div style={{ minHeight: '100vh', background: T.paper, fontFamily: T.body, color: T.ink, width: '100%' }}>
       <FontLoader />
 
       {/* Navbar */}
@@ -296,13 +296,13 @@ const Dashboard: React.FC = () => {
       >
         <div
           style={{
-            maxWidth: 1240,
-            margin: '0 auto',
-            padding: '0 24px',
+            width: '100%',
+            padding: '0 32px',
             height: 68,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            boxSizing: 'border-box',
           }}
         >
           {/* Logo & Main Nav */}
@@ -355,18 +355,20 @@ const Dashboard: React.FC = () => {
               >
                 Dashboard
               </a>
-              <a
-                onClick={() => navigate('/my-courses')}
-                style={{
-                  fontSize: 13.5,
-                  fontWeight: 500,
-                  color: T.inkSoft,
-                  textDecoration: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                My Courses
-              </a>
+              {user?.role === 'STUDENT' && (
+                <a
+                    onClick={() => navigate('/my-courses')}
+                    style={{
+                        fontSize: 13.5,
+                        fontWeight: 500,
+                        color: T.inkSoft,
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                    }}
+                >
+                    My Courses
+                </a>
+            )}
             </nav>
           </div>
 
@@ -558,7 +560,7 @@ const Dashboard: React.FC = () => {
         </div>
       </header>
 
-      <main style={{ maxWidth: 1240, margin: '0 auto', padding: '40px 24px 72px' }}>
+      <main style={{ width: '100%', padding: '40px 32px 72px', boxSizing: 'border-box' }}>
         {/* Welcome Header */}
         <div style={{ marginBottom: 36 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
