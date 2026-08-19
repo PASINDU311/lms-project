@@ -177,52 +177,71 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
     }
   };
 
+  const cardAccentColors = ['#2B4A3E', '#3D5A73', '#B98A1E', '#B5482F'];
+
   return (
     <div
       style={{
         marginTop: '20px',
-        background: '#ffffff',
-        padding: '20px',
-        borderRadius: '12px',
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+        backgroundColor: '#FFFFFF',
+        padding: '24px',
+        borderRadius: '10px',
+        border: '1px solid #E4DFD1',
+        borderTop: '3px solid #2B4A3E',
+        fontFamily: "'Inter', sans-serif",
+        color: '#201F1C',
       }}
     >
+      <style>
+        {`@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');`}
+      </style>
+
       {/* Header Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <h5 style={{ margin: 0, color: '#0f172a', fontSize: '16px', fontWeight: '700' }}>
-            📝 Assignments
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h5 style={{ margin: 0, color: '#201F1C', fontSize: '18px', fontWeight: '600', fontFamily: "'Fraunces', serif" }}>
+            Course Assignments
           </h5>
           <span
             style={{
-              background: '#f1f5f9',
-              color: '#475569',
-              fontSize: '12px',
-              fontWeight: '700',
+              backgroundColor: '#E7EEE9',
+              color: '#2B4A3E',
+              border: '1px solid #2B4A3E',
+              fontSize: '11px',
+              fontWeight: '600',
+              fontFamily: "'IBM Plex Mono', monospace",
               padding: '2px 8px',
-              borderRadius: '12px',
+              borderRadius: '4px',
+              letterSpacing: '0.05em',
             }}
           >
-            {assignments.length}
+            {assignments.length < 10 ? `0${assignments.length}` : assignments.length} FILLED
           </span>
         </div>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
           style={{
             padding: '8px 14px',
-            background: showCreateForm ? '#64748b' : '#ea580c',
-            color: '#ffffff',
-            border: 'none',
-            borderRadius: '6px',
+            backgroundColor: showCreateForm ? '#FAF8F3' : '#2B4A3E',
+            color: showCreateForm ? '#201F1C' : '#FAF8F3',
+            border: showCreateForm ? '1px solid #E4DFD1' : 'none',
+            borderRadius: '7px',
             cursor: 'pointer',
-            fontSize: '13px',
+            fontSize: '12.5px',
             fontWeight: '600',
-            transition: 'background 0.2s ease',
+            fontFamily: "'Inter', sans-serif",
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
           }}
         >
-          {showCreateForm ? 'Cancel' : '+ Add Assignment'}
+          {showCreateForm ? (
+            'Discard'
+          ) : (
+            <>
+              <span style={{ fontFamily: "'IBM Plex Mono', monospace" }}>+</span> Add Assignment
+            </>
+          )}
         </button>
       </div>
 
@@ -232,15 +251,15 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
           onSubmit={handleCreateAssignment}
           style={{
             marginTop: '16px',
-            marginBottom: '20px',
-            background: '#f8fafc',
-            padding: '16px',
-            borderRadius: '10px',
-            border: '1px solid #cbd5e1',
+            marginBottom: '24px',
+            backgroundColor: '#FAF8F3',
+            padding: '20px',
+            borderRadius: '8px',
+            border: '1.5px dashed #D2CBB8',
           }}
         >
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '10px', fontWeight: '600', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
               Assignment Title
             </label>
             <input
@@ -252,18 +271,20 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                fontSize: '14px',
+                borderRadius: '7px',
+                border: '1px solid #E4DFD1',
+                fontSize: '13.5px',
                 outline: 'none',
                 boxSizing: 'border-box',
-                background: '#ffffff',
+                backgroundColor: '#FFFFFF',
+                color: '#201F1C',
+                fontFamily: "'Inter', sans-serif",
               }}
             />
           </div>
 
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '10px', fontWeight: '600', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
               Instructions / Description
             </label>
             <textarea
@@ -275,20 +296,22 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                borderRadius: '6px',
-                border: '1px solid #cbd5e1',
-                fontSize: '14px',
+                borderRadius: '7px',
+                border: '1px solid #E4DFD1',
+                fontSize: '13.5px',
                 outline: 'none',
                 boxSizing: 'border-box',
-                background: '#ffffff',
+                backgroundColor: '#FFFFFF',
+                color: '#201F1C',
                 resize: 'vertical',
+                fontFamily: "'Inter', sans-serif",
               }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '10px', fontWeight: '600', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
                 Max Marks
               </label>
               <input
@@ -296,18 +319,20 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
                 value={maxMarks}
                 onChange={(e) => setMaxMarks(Number(e.target.value))}
                 style={{
-                  width: '100px',
+                  width: '110px',
                   padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  borderRadius: '7px',
+                  border: '1px solid #E4DFD1',
                   fontSize: '13px',
                   outline: 'none',
-                  background: '#ffffff',
+                  backgroundColor: '#FFFFFF',
+                  color: '#201F1C',
+                  fontFamily: "'IBM Plex Mono', monospace",
                 }}
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#475569', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '10px', fontWeight: '600', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
                 Deadline
               </label>
               <input
@@ -316,11 +341,13 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
                 onChange={(e) => setDueDate(e.target.value)}
                 style={{
                   padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
+                  borderRadius: '7px',
+                  border: '1px solid #E4DFD1',
                   fontSize: '13px',
                   outline: 'none',
-                  background: '#ffffff',
+                  backgroundColor: '#FFFFFF',
+                  color: '#201F1C',
+                  fontFamily: "'Inter', sans-serif",
                 }}
               />
             </div>
@@ -329,18 +356,18 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
           <button
             type="submit"
             style={{
-              padding: '9px 16px',
-              background: '#16a34a',
-              color: '#ffffff',
+              padding: '9px 18px',
+              backgroundColor: '#2B4A3E',
+              color: '#FAF8F3',
               border: 'none',
-              borderRadius: '6px',
+              borderRadius: '7px',
               cursor: 'pointer',
               fontSize: '13px',
               fontWeight: '600',
-              boxShadow: '0 2px 6px rgba(22, 163, 74, 0.2)',
+              fontFamily: "'Inter', sans-serif",
             }}
           >
-            Save Assignment
+            Add to catalog
           </button>
         </form>
       )}
@@ -351,19 +378,19 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
           onSubmit={handleUpdateAssignment}
           style={{
             marginTop: '16px',
-            marginBottom: '20px',
-            background: '#fffbeb',
-            padding: '16px',
-            borderRadius: '10px',
-            border: '1px solid #fde68a',
+            marginBottom: '24px',
+            backgroundColor: '#FBF1DA',
+            padding: '20px',
+            borderRadius: '8px',
+            border: '1.5px dashed #B98A1E',
           }}
         >
-          <h6 style={{ margin: '0 0 12px 0', color: '#b45309', fontSize: '14px', fontWeight: '700' }}>
-            ✏️ Edit Assignment
+          <h6 style={{ margin: '0 0 16px 0', color: '#B98A1E', fontSize: '15px', fontWeight: '600', fontFamily: "'Fraunces', serif" }}>
+            Edit Assignment Entry
           </h6>
 
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#92400e', textTransform: 'uppercase', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '10px', fontWeight: '600', color: '#B98A1E', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
               Assignment Title
             </label>
             <input
@@ -375,18 +402,20 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                borderRadius: '6px',
-                border: '1px solid #fcd34d',
-                fontSize: '14px',
+                borderRadius: '7px',
+                border: '1px solid #E4DFD1',
+                fontSize: '13.5px',
                 outline: 'none',
                 boxSizing: 'border-box',
-                background: '#ffffff',
+                backgroundColor: '#FFFFFF',
+                color: '#201F1C',
+                fontFamily: "'Inter', sans-serif",
               }}
             />
           </div>
 
-          <div style={{ marginBottom: '12px' }}>
-            <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#92400e', textTransform: 'uppercase', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{ display: 'block', fontSize: '10px', fontWeight: '600', color: '#B98A1E', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
               Instructions / Description
             </label>
             <textarea
@@ -398,20 +427,22 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
               style={{
                 width: '100%',
                 padding: '10px 12px',
-                borderRadius: '6px',
-                border: '1px solid #fcd34d',
-                fontSize: '14px',
+                borderRadius: '7px',
+                border: '1px solid #E4DFD1',
+                fontSize: '13.5px',
                 outline: 'none',
                 boxSizing: 'border-box',
-                background: '#ffffff',
+                backgroundColor: '#FFFFFF',
+                color: '#201F1C',
                 resize: 'vertical',
+                fontFamily: "'Inter', sans-serif",
               }}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#92400e', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '10px', fontWeight: '600', color: '#B98A1E', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
                 Max Marks
               </label>
               <input
@@ -419,18 +450,20 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
                 value={editMaxMarks}
                 onChange={(e) => setEditMaxMarks(Number(e.target.value))}
                 style={{
-                  width: '100px',
+                  width: '110px',
                   padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #fcd34d',
+                  borderRadius: '7px',
+                  border: '1px solid #E4DFD1',
                   fontSize: '13px',
                   outline: 'none',
-                  background: '#ffffff',
+                  backgroundColor: '#FFFFFF',
+                  color: '#201F1C',
+                  fontFamily: "'IBM Plex Mono', monospace",
                 }}
               />
             </div>
             <div>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', color: '#92400e', textTransform: 'uppercase', marginBottom: '4px' }}>
+              <label style={{ display: 'block', fontSize: '10px', fontWeight: '600', color: '#B98A1E', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>
                 Deadline
               </label>
               <input
@@ -439,252 +472,346 @@ const InstructorAssignmentManager: React.FC<Props> = ({ sectionId }) => {
                 onChange={(e) => setEditDueDate(e.target.value)}
                 style={{
                   padding: '8px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid #fcd34d',
+                  borderRadius: '7px',
+                  border: '1px solid #E4DFD1',
                   fontSize: '13px',
                   outline: 'none',
-                  background: '#ffffff',
+                  backgroundColor: '#FFFFFF',
+                  color: '#201F1C',
+                  fontFamily: "'Inter', sans-serif",
                 }}
               />
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '10px' }}>
             <button
               type="submit"
               style={{
-                padding: '8px 14px',
-                background: '#2563eb',
-                color: '#ffffff',
+                padding: '8px 16px',
+                backgroundColor: '#2B4A3E',
+                color: '#FAF8F3',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '7px',
                 cursor: 'pointer',
-                fontSize: '13px',
+                fontSize: '12.5px',
                 fontWeight: '600',
+                fontFamily: "'Inter', sans-serif",
               }}
             >
-              Update Assignment
+              Update Entry
             </button>
             <button
               type="button"
               onClick={() => setEditingAssignment(null)}
               style={{
-                padding: '8px 14px',
-                background: '#64748b',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '6px',
+                padding: '8px 16px',
+                backgroundColor: 'transparent',
+                border: '1px solid #E4DFD1',
+                color: '#6B6558',
+                borderRadius: '7px',
                 cursor: 'pointer',
-                fontSize: '13px',
+                fontSize: '12.5px',
                 fontWeight: '600',
+                fontFamily: "'Inter', sans-serif",
               }}
             >
-              Cancel
+              Discard
             </button>
           </div>
         </form>
       )}
 
       {/* Existing Assignments List */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {assignments.map((assignment) => (
-          <div
-            key={assignment.id}
-            style={{
-              background: '#ffffff',
-              padding: '16px',
-              borderRadius: '10px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-              <div style={{ flex: 1, minWidth: '240px' }}>
-                <strong style={{ fontSize: '15px', color: '#0f172a', fontWeight: '700' }}>{assignment.title}</strong>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b', lineHeight: '1.5' }}>
-                  {assignment.description}
-                </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {assignments.length > 0 ? (
+          assignments.map((assignment, idx) => {
+            const accentColor = cardAccentColors[idx % cardAccentColors.length];
 
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginTop: '8px', fontSize: '12px' }}>
-                  <span style={{ color: '#475569', fontWeight: '600', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px' }}>
-                    Max Marks: {assignment.max_marks}
-                  </span>
-                  {assignment.due_date && (
-                    <span style={{ color: '#dc2626', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      ⏳ Due: {new Date(assignment.due_date).toLocaleString()}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button
-                  onClick={() => handleEditClick(assignment)}
-                  style={{
-                    padding: '6px 10px',
-                    background: '#fef3c7',
-                    color: '#d97706',
-                    border: '1px solid #fde68a',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                  }}
-                >
-                  ✏️ Edit
-                </button>
-                <button
-                  onClick={() => handleDeleteAssignment(assignment.id)}
-                  style={{
-                    padding: '6px 10px',
-                    background: '#fef2f2',
-                    color: '#dc2626',
-                    border: '1px solid #fecaca',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                  }}
-                >
-                  🗑️ Delete
-                </button>
-                <button
-                  onClick={() => handleViewSubmissions(assignment.id)}
-                  style={{
-                    padding: '6px 12px',
-                    background: selectedAssignmentId === assignment.id ? '#1e293b' : '#2563eb',
-                    color: '#ffffff',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                  }}
-                >
-                  {selectedAssignmentId === assignment.id ? 'Hide Submissions' : 'Submissions 🎯'}
-                </button>
-              </div>
-            </div>
-
-            {/* Submissions List & Grading UI */}
-            {selectedAssignmentId === assignment.id && (
+            return (
               <div
+                key={assignment.id}
                 style={{
-                  marginTop: '16px',
-                  background: '#f8fafc',
-                  padding: '16px',
+                  backgroundColor: '#FFFFFF',
+                  padding: '20px',
                   borderRadius: '8px',
-                  borderTop: '2px solid #2563eb',
+                  border: '1px solid #E4DFD1',
+                  borderTop: `3px solid ${accentColor}`,
                 }}
               >
-                <h6 style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#1e293b', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Student Submissions
-                </h6>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                  <div style={{ flex: 1, minWidth: '240px' }}>
+                    <div style={{ fontSize: '10px', fontWeight: '600', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                      REF #{assignment.id}
+                    </div>
+                    <strong style={{ fontSize: '16px', color: '#201F1C', fontWeight: '600', fontFamily: "'Fraunces', serif", display: 'block' }}>
+                      {assignment.title}
+                    </strong>
+                    <p style={{ margin: '6px 0 12px 0', fontSize: '13.5px', color: '#6B6558', lineHeight: '1.5' }}>
+                      {assignment.description}
+                    </p>
 
-                {loadingSubmissions ? (
-                  <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>Loading submissions...</p>
-                ) : submissions.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {submissions.map((sub) => (
-                      <div
-                        key={sub.id}
-                        style={{
-                          background: '#ffffff',
-                          padding: '12px 14px',
-                          borderRadius: '8px',
-                          border: '1px solid #cbd5e1',
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <span style={{ fontSize: '13px', fontWeight: '700', color: '#1e293b' }}>
-                            👤 {sub.User?.name || `Student ID: ${sub.user_id}`} <span style={{ color: '#64748b', fontWeight: 'normal' }}>({sub.User?.email})</span>
-                          </span>
-                          <span
-                            style={{
-                              fontSize: '11px',
-                              background: sub.status === 'GRADED' ? '#dcfce7' : '#fef3c7',
-                              color: sub.status === 'GRADED' ? '#166534' : '#92400e',
-                              padding: '2px 8px',
-                              borderRadius: '12px',
-                              fontWeight: '700',
-                            }}
-                          >
-                            {sub.status}
-                          </span>
-                        </div>
-
-                        {sub.submission_url && (
-                          <div style={{ fontSize: '13px', marginBottom: '6px' }}>
-                            🔗 Link/URL:{' '}
-                            <a href={sub.submission_url} target="_blank" rel="noreferrer" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>
-                              {sub.submission_url}
-                            </a>
-                          </div>
-                        )}
-
-                        {sub.content && (
-                          <div style={{ fontSize: '13px', background: '#f1f5f9', padding: '8px 12px', borderRadius: '6px', marginBottom: '10px', color: '#334155' }}>
-                            💬 Submission Text: {sub.content}
-                          </div>
-                        )}
-
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                          <input
-                            type="number"
-                            placeholder="Marks"
-                            defaultValue={sub.marks ?? ''}
-                            onChange={(e) => setGradingMarks({ ...gradingMarks, [sub.id]: Number(e.target.value) })}
-                            style={{
-                              width: '80px',
-                              padding: '6px 8px',
-                              fontSize: '13px',
-                              borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
-                              outline: 'none',
-                            }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Feedback (e.g. Good job!)"
-                            defaultValue={sub.feedback ?? ''}
-                            onChange={(e) => setGradingFeedback({ ...gradingFeedback, [sub.id]: e.target.value })}
-                            style={{
-                              flex: 1,
-                              minWidth: '180px',
-                              padding: '6px 10px',
-                              fontSize: '13px',
-                              borderRadius: '6px',
-                              border: '1px solid #cbd5e1',
-                              outline: 'none',
-                            }}
-                          />
-                          <button
-                            onClick={() => handleGradeSubmission(sub.id)}
-                            style={{
-                              padding: '6px 14px',
-                              background: '#16a34a',
-                              color: '#ffffff',
-                              border: 'none',
-                              borderRadius: '6px',
-                              cursor: 'pointer',
-                              fontSize: '12px',
-                              fontWeight: '600',
-                            }}
-                          >
-                            Save Grade
-                          </button>
-                        </div>
+                    {/* Report Card Strip for Assignment Meta */}
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        backgroundColor: '#FAF8F3',
+                        border: '1px solid #E4DFD1',
+                        borderRadius: '6px',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <div style={{ padding: '6px 12px', borderRight: '1px solid #E4DFD1', display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '9px', fontWeight: '600', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                          MAX MARKS
+                        </span>
+                        <span style={{ fontSize: '13px', fontWeight: '600', color: '#201F1C', fontFamily: "'IBM Plex Mono', monospace" }}>
+                          {assignment.max_marks}
+                        </span>
                       </div>
-                    ))}
+                      {assignment.due_date && (
+                        <div style={{ padding: '6px 12px', display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '9px', fontWeight: '600', color: '#B5482F', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            DUE DATE
+                          </span>
+                          <span style={{ fontSize: '13px', fontWeight: '600', color: '#B5482F', fontFamily: "'IBM Plex Mono', monospace" }}>
+                            {new Date(assignment.due_date).toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                ) : (
-                  <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>No submissions received for this assignment yet.</p>
+
+                  {/* Action Buttons */}
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => handleEditClick(assignment)}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: 'transparent',
+                        color: '#6B6558',
+                        border: '1px solid #E4DFD1',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        fontFamily: "'Inter', sans-serif",
+                      }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDeleteAssignment(assignment.id)}
+                      style={{
+                        padding: '6px 12px',
+                        backgroundColor: '#FBEAE3',
+                        color: '#B5482F',
+                        border: '1px solid #B5482F',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        fontFamily: "'Inter', sans-serif",
+                      }}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      onClick={() => handleViewSubmissions(assignment.id)}
+                      style={{
+                        padding: '6px 14px',
+                        backgroundColor: selectedAssignmentId === assignment.id ? '#FAF8F3' : '#2B4A3E',
+                        color: selectedAssignmentId === assignment.id ? '#201F1C' : '#FAF8F3',
+                        border: selectedAssignmentId === assignment.id ? '1px solid #E4DFD1' : 'none',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '600',
+                        fontFamily: "'Inter', sans-serif",
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                      </svg>
+                      {selectedAssignmentId === assignment.id ? 'Hide Submissions' : 'Submissions'}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submissions List & Grading UI */}
+                {selectedAssignmentId === assignment.id && (
+                  <div
+                    style={{
+                      marginTop: '20px',
+                      backgroundColor: '#FAF8F3',
+                      padding: '16px',
+                      borderRadius: '8px',
+                      border: '1px solid #E4DFD1',
+                      borderTop: '2px solid #2B4A3E',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                      <h6 style={{ margin: 0, fontSize: '11px', color: '#A39C8C', fontWeight: '600', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        STUDENT SUBMISSIONS CATALOG
+                      </h6>
+                      <span style={{ fontSize: '11px', fontFamily: "'IBM Plex Mono', monospace", color: '#2B4A3E', fontWeight: 600 }}>
+                        COUNT: {submissions.length}
+                      </span>
+                    </div>
+
+                    {loadingSubmissions ? (
+                      <p style={{ fontSize: '12px', fontFamily: "'IBM Plex Mono', monospace", color: '#A39C8C', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+                        FETCHING SUBMISSIONS DATA...
+                      </p>
+                    ) : submissions.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        {submissions.map((sub) => (
+                          <div
+                            key={sub.id}
+                            style={{
+                              position: 'relative',
+                              backgroundColor: '#FFFFFF',
+                              padding: '16px',
+                              borderRadius: '8px',
+                              border: '1px solid #E4DFD1',
+                              overflow: 'hidden',
+                            }}
+                          >
+                            {/* Rotated Stamp Badge */}
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: '16px',
+                                right: '16px',
+                                transform: 'rotate(28deg)',
+                                backgroundColor: sub.status === 'GRADED' ? '#E7EEE9' : '#FBF1DA',
+                                color: sub.status === 'GRADED' ? '#2B4A3E' : '#B98A1E',
+                                border: `1.5px solid ${sub.status === 'GRADED' ? '#2B4A3E' : '#B98A1E'}`,
+                                padding: '2px 8px',
+                                borderRadius: '4px',
+                                fontFamily: "'IBM Plex Mono', monospace",
+                                fontSize: '10px',
+                                fontWeight: 600,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.08em',
+                                pointerEvents: 'none',
+                              }}
+                            >
+                              {sub.status}
+                            </div>
+
+                            <div style={{ marginBottom: '10px', paddingRight: '80px' }}>
+                              <span style={{ fontSize: '14px', fontWeight: '600', color: '#201F1C', display: 'block' }}>
+                                {sub.User?.name || `Student ID: ${sub.user_id}`}
+                              </span>
+                              <span style={{ fontSize: '12px', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace" }}>
+                                {sub.User?.email}
+                              </span>
+                            </div>
+
+                            {sub.submission_url && (
+                              <div style={{ fontSize: '13px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3D5A73" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                                  <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                                </svg>
+                                <span style={{ color: '#6B6558' }}>Attachment:</span>
+                                <a href={sub.submission_url} target="_blank" rel="noreferrer" style={{ color: '#3D5A73', fontWeight: '600', textDecoration: 'underline', fontFamily: "'IBM Plex Mono', monospace" }}>
+                                  {sub.submission_url}
+                                </a>
+                              </div>
+                            )}
+
+                            {sub.content && (
+                              <div style={{ fontSize: '13px', backgroundColor: '#FAF8F3', border: '1px solid #E4DFD1', padding: '10px 12px', borderRadius: '6px', marginBottom: '12px', color: '#201F1C', lineHeight: '1.5' }}>
+                                <span style={{ display: 'block', fontSize: '9px', fontWeight: '600', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                                  SUBMISSION NOTES
+                                </span>
+                                {sub.content}
+                              </div>
+                            )}
+
+                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', paddingTop: '10px', borderTop: '1px solid #E4DFD1' }}>
+                              <div>
+                                <input
+                                  type="number"
+                                  placeholder="Marks"
+                                  defaultValue={sub.marks ?? ''}
+                                  onChange={(e) => setGradingMarks({ ...gradingMarks, [sub.id]: Number(e.target.value) })}
+                                  style={{
+                                    width: '85px',
+                                    padding: '7px 9px',
+                                    fontSize: '13px',
+                                    borderRadius: '6px',
+                                    border: '1px solid #E4DFD1',
+                                    outline: 'none',
+                                    backgroundColor: '#FFFFFF',
+                                    color: '#201F1C',
+                                    fontFamily: "'IBM Plex Mono', monospace",
+                                  }}
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                placeholder="Feedback (e.g., Good job!)"
+                                defaultValue={sub.feedback ?? ''}
+                                onChange={(e) => setGradingFeedback({ ...gradingFeedback, [sub.id]: e.target.value })}
+                                style={{
+                                  flex: 1,
+                                  minWidth: '180px',
+                                  padding: '7px 10px',
+                                  fontSize: '13px',
+                                  borderRadius: '6px',
+                                  border: '1px solid #E4DFD1',
+                                  outline: 'none',
+                                  backgroundColor: '#FFFFFF',
+                                  color: '#201F1C',
+                                  fontFamily: "'Inter', sans-serif",
+                                }}
+                              />
+                              <button
+                                onClick={() => handleGradeSubmission(sub.id)}
+                                style={{
+                                  padding: '7px 14px',
+                                  backgroundColor: '#2B4A3E',
+                                  color: '#FAF8F3',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontSize: '12px',
+                                  fontWeight: '600',
+                                  fontFamily: "'Inter', sans-serif",
+                                }}
+                              >
+                                Save Grade
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ padding: '20px', textAlign: 'center', backgroundColor: '#FFFFFF', borderRadius: '6px', border: '1.5px dashed #D2CBB8' }}>
+                        <p style={{ fontSize: '11px', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+                          No submissions recorded for this assignment.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
+            );
+          })
+        ) : (
+          <div style={{ padding: '28px 20px', textAlign: 'center', backgroundColor: '#FAF8F3', borderRadius: '8px', border: '1.5px dashed #D2CBB8' }}>
+            <p style={{ fontSize: '11px', color: '#A39C8C', fontFamily: "'IBM Plex Mono', monospace", textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+              The assignment catalog is empty.
+            </p>
           </div>
-        ))}
+        )}
       </div>
     </div>
   );
